@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<!-- Mirrored from https://prouchetkokshe.pages.dev/css/style.css by HTTrack Website Copier/3.x [XR&CO], Wed, 14 Oct 2026 15:10:56 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--SEO МЕТА-ТЕГИ-->
+    <title>Курсы бухгалтера в Казахстане с нуля | ProUchet</title>
+    <meta name="description" content="Обучение бухгалтерскому учету для ИП и ТОО. Курсы 1С 8.3, налоги, отчетность. Станьте профессиональным бухгалтером за 2 месяца с ProUchet.">
+    <meta name="keywords" content="курсы бухгалтера, обучение 1С, налоги Казахстан, курсы ТОО ИП, бухгалтерский учет с нуля, ProUchet Кокшетау, ProUchet, Rakhimova, by rakhimova">
+    <meta name="author" content="Rakhimova">
+    <meta name="robots" content="index, follow">
+
+    <!--Open Graph & Telegram-->
+    <meta property="og:type" content="website">
+    <meta property="og :url" content="../index.html"> <!-- Замени на свой реальный домен -->
+    <meta property="og:title" content="ProUchet — Стань профессиональным бухгалтером">
+    <meta property="og:description" content="Практические курсы бухгалтерии: от азов до уровня главного бухгалтера.">
+    <meta property="og:image" content="../../connectify-7d6c9.web.app/resources/media/images/logo2.html">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Favicon -->
+    <link rel="icon" href="resources/media/images/logo.html" type="image/x-icon">
+    
+    <!-- иконки и шрифты -->
+    <link rel="stylesheet" href="../../cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+
+    <style>
+    :root {
+        --primary: #2563eb;
+        --primary-light: #60a5fa;
+        --accent: #f59e0b;
+        --dark: #0f172a;
+        --text: #334155;
+        --text-light: #64748b;
+        --bg: #f8fafc;
+        --white: #ffffff;
+        --glass: rgba(255, 255, 255, 0.8);
+        --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        --border-glass: 1px solid rgba(0,0,0,0.02);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    
+    .no-scroll { overflow: hidden; height: 100vh; }
+
+    .no-select { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none;}
+
+    /* кастомный скроллбар */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    img {
+        pointer-events: none; /* Картинка перестает реагировать на мышь */
+        -webkit-touch-callout: none;
+    }
+
+    /* Фоновое видео */
+    .video-bg {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -2; overflow: hidden;
+    }
+    .video-bg video {
+        min-width: 100%; min-height: 100%; width: auto; height: auto;
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        object-fit: cover;
+    }
+    .video-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1; 
+        background: linear-gradient(to bottom, rgba(248, 250, 252, 0.7) 60%, rgba(248, 250, 252, 0.9) 100%);
+    }
+
+    /* Базовые контейнеры */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .section-padding { padding: 100px 0; }
+    .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 30px; color: var(--dark); }
+    .section-description { text-align: center; font-size: 1rem; margin-bottom: 50px; }
+
+    /* ПЛЮШКА: Индикатор прогресса чтения */
+    .scroll-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 4px; z-index: 1001; }
+    .scroll-progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary-light), var(--primary), #8b5cf6); width: 0%; border-radius: 0 2px 2px 0; }
+
+    /* Шапка */
+    header { position: fixed; top: 0; width: 100%; z-index: 1000; padding: 20px 0; transition: var(--transition); background: transparent; }
+    header.scrolled { background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); padding: 10px 0; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.041); }
+    
+    nav { display: flex; justify-content: space-between; align-items: center; height: 80px; }
+    
+    .logo-wrapper { display: flex; align-items: center; gap: 12px; text-decoration: none; z-index: 102; }
+    .logo-img { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: var(--white); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .logo-img img { width: 100%; height: 100%; object-fit: cover; }
+    .logo-text { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+    /* .logo-text span { color: var(--primary); } */
+
+    .nav-links { display: flex; gap: 35px; align-items: center; }
+    .nav-link { text-decoration: none; color: var(--text); font-weight: 600; transition: 0.3s; position: relative; }
+    .nav-link::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--primary); transition: 0.3s; }
+    .nav-link:hover::after { width: 100%; }
+
+    /* Бургер меню */
+    .burger { display: none; cursor: pointer; flex-direction: column; gap: 6px; z-index: 102; } /* z-index выше меню! */
+    .burger span { width: 28px; height: 3px; background-color: var(--dark); border-radius: 5px; transition: 0.4s; }
+
+    /* --- Hero --- */
+    .hero { padding: 180px 0 100px; background: transparent; position: relative; }
+    .hero-content { max-width: 800px; text-align: center; margin: 0 auto; position: relative; z-index: 2; }
+    .text-gradient { background: linear-gradient(90deg, var(--primary), #8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero h1 { font-size: 4rem; line-height: 1.1; margin-bottom: 20px; }
+    .hero p { font-size: 1.25rem; color: var(--text-light); margin-bottom: 40px; }
+    .hero-btns { display: flex; gap: 15px; justify-content: center; }
+
+    /* --- Общий класс для стеклянных карточек (чистота кода) --- */
+    .glass-card {
+        background: var(--glass); 
+        padding: 40px; 
+        border-radius: 30px; 
+        transition: var(--transition);
+        border: var(--border-glass);
+        position: relative;
+    }
+    .glass-card:hover { transform: translateY(-15px); box-shadow: var(--shadow); border-color: var(--primary-light); }
+
+    /* --- Особенности --- */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+    
+    .feature-card-description { padding: 0; overflow: hidden; margin: 0 auto 50px; }
+    .feature-card-description:hover { transform: translateY(-10px); }
+    
+    .card-inner { display: flex; align-items: stretch; flex-wrap: wrap; }
+    .card-text { flex: 1; padding: 40px; min-width: 300px; }
+    .card-video { flex: 1; min-width: 300px; position: relative; background: #2e2e2e; min-height: 300px; }
+    .card-video video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    
+    .logo-img-big { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: var(--white); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; }
+    .logo-img-big img { width: 100%; height: 100%; object-fit: cover; }
+
+    .icon-box { width: 70px; height: 70px; background: #eff6ff; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); perspective: 1000px; }
+    .icon-box i { font-size: 1.8rem; color: var(--primary); transition: 0.6s; }
+    .glass-card:hover .icon-box { transform: rotateY(360deg); background: var(--primary); }
+    .glass-card:hover .icon-box i { color: white; }
+
+    /* --- Наш процесс --- */
+    .process-header { max-width: 800px; margin: 0 auto 48px auto; text-align: center; }
+    .badge { color: var(--primary); font-weight: 700; display: inline-block; margin-bottom: 15px; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; background: #eff6ff; padding: 6px 16px; border-radius: 20px; }
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+    
+    .step-number { width: 60px; height: 60px; background-color: #eff6ff; color: var(--primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin-bottom: 25px; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); perspective: 1000px; }
+    .glass-card:hover .step-number { transform: rotateY(360deg); background: var(--primary); color: white; }
+    .step-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 12px; color: var(--dark); }
+    .step-text { font-size: 1rem; line-height: 1.6; color: var(--text-light); margin: 0; }
+
+    /* --- Buttons --- */
+    .btn { padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 600; display: inline-block; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; border: none; cursor: pointer;}
+    .btn-primary { background: var(--primary); color: white; margin-top: auto; }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3); }
+    .btn-secondary { background: white; color: var(--text); border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #f1f5f9; transform: translateY(-3px); }
+    .btn-success { background: #10b981 !important; }
+
+    /* --- FAQ (Оригинальные плашки) --- */
+    .faq-container { max-width: 800px; margin: 0 auto; }
+    .faq-item {
+        background: var(--white);
+        margin-bottom: 15px;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        border-left: 4px solid transparent; 
+        transition: 0.3s ease;
+    }
+    .faq-item:hover { background: #f8fafc; }
+    .faq-question { padding: 24px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; font-size: 1.1rem; transition: 0.3s; }
+    .faq-question i { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); color: var(--primary); background: #eff6ff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .faq-answer { max-height: 0; transition: max-height 0.4s ease-out; }
+    .faq-answer-content { padding: 0 24px 24px; color: var(--text-light); line-height: 1.7; }
+    
+    .faq-item.active { border-left-color: var(--primary); background: var(--white); }
+    .faq-item.active .faq-question { color: var(--primary); }
+    .faq-item.active .faq-answer { max-height: 300px; } 
+    .faq-item.active .faq-question i { transform: rotate(180deg); background: var(--primary); color: white; }
+
+    /* --- Course Cards --- */
+    .courses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+    .course-card { display: flex; flex-direction: column; border-radius: 24px; border: 1px solid #f1f5f9;}
+    .course-card:hover { transform: translateY(-10px); }
+    .course-tag { position: absolute; top: 20px; right: 20px; background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .price { font-size: 2rem; font-weight: 800; display: block; margin: 20px 0; color: var(--dark); }
+    .course-features { list-style: none; flex-grow: 1; margin-bottom: 30px; }
+    .course-features li { margin-bottom: 12px; color: var(--text-light); display: flex; align-items: center; }
+    .course-features i { color: #10b981; margin-right: 10px; font-size: 0.9rem; flex-shrink: 0; }
+    .full-width { width: 100%; text-align: center; }
+
+    /* --- Контактная форма --- */
+    .contact-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+    .contact-info p { margin-bottom: 30px; color: var(--text-light); }
+    .social-links { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+    .social-btn { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 12px; text-decoration: none; color: white; font-weight: 600; transition: 0.3s; }
+    .social-btn.wa { background: #25D366; }
+    .social-btn.tg { background: #0088cc; }
+    .social-btn:hover { opacity: 0.9; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .form-policy {color: var(--primary); text-decoration: none; cursor: pointer; font-weight: bold;}
+    /* --- Контактная форма 2 --- */
+    .contact-form { display: flex; flex-direction: column; gap: 15px; }
+    .form-group { display: flex; flex-direction: column; width: 100%; }
+    .form-group input { width: 100%; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.3s; font-size: 1rem; font-family: inherit; background: var(--white); }
+    .form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    .form-group input.error { border-color: #ef4444 !important; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important; animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    .error-message { color: #ef4444; font-size: 0.75rem; margin-top: 5px; margin-left: 5px; display: none; /* Скрыто полностью */opacity: 0; transform: translateY(-5px); transition: 0.3s ease; }
+    .error-message.show { display: block; opacity: 1; transform: translateY(0); }
+    @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+    /* --- Плавающие кнопки --- */
+    .floating-social { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
+    .float-icon { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; text-decoration: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: 0.3s; }
+    .float-icon.wa { background: #25D366; }
+    .float-icon.tg { background: #0088cc; }
+    .float-icon:hover { transform: scale(1.1) translateY(-5px); }
+
+    /* --- Footer --- */
+    footer { background: var(--white); border-top: 1px solid #f1f5f9; padding: 80px 0 40px; color: var(--text); }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.5fr; gap: 40px; margin-bottom: 60px; }
+    .footer-brand .logo-text { margin-bottom: 20px; display: block; }
+    .footer-brand p { color: var(--text-light); font-size: 0.95rem; max-width: 250px; }
+    .footer-title { font-weight: 700; margin-bottom: 25px; color: var(--dark); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 12px; }
+    .footer-links a { text-decoration: none; color: var(--text-light); transition: var(--transition); font-size: 0.95rem; }
+    .footer-links a:hover { color: var(--primary); padding-left: 5px; }
+    .footer-contact-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; color: var(--text-light); font-size: 0.95rem; }
+    .footer-contact-item i { color: var(--primary); margin-top: 4px; }
+    .footer-bottom { border-top: 1px solid #f1f5f9; padding-top: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+    .copyright { color: var(--text-light); font-size: 0.9rem; }
+    .footer-legal { display: flex; gap: 25px; }
+    .footer-legal a { text-decoration: none; color: var(--text-light); font-size: 0.85rem; transition: 0.3s; }
+    .footer-legal a:hover { color: var(--primary); }
+    /* Адаптивность футера */
+    @media (max-width: 992px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 576px) { footer { padding: 60px 0 30px; } .footer-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } .footer-brand p { max-width: 100%; } .footer-contact-item { justify-content: center; } .footer-bottom { flex-direction: column; text-align: center; } }
+
+    /* --- Animations --- */
+    .reveal { opacity: 0; transform: translateY(40px); transition: 1s all ease; }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+
+    /* --- ИДЕАЛЬНАЯ АДАПТИВНОСТЬ --- */
+    @media (max-width: 992px) {
+        .contact-wrapper { grid-template-columns: 1fr; padding: 30px; }
+        .hero h1 { font-size: 3rem; }
+    }
+
+    @media (max-width: 768px) {
+        .hero h1 { font-size: 2.5rem; }
+        .hero-btns { flex-direction: column; }
+        .logo-img { width: 38px; height: 38px; }
+        .logo-text { font-size: 1.3rem; }
+        
+        /* Исправление видео-блока на мобилке */
+        .card-video { height: 250px; min-height: 250px; } 
+        .card-video video { position: relative; }
+        .section-title { font-size: 2rem; margin-bottom: 30px; }
+        
+        .nav-btn.desktop { display: none; }
+        .burger { display: flex; }
+        
+        /* Исправленное фиксированное меню на весь экран */
+        .nav-links {
+            position: fixed; top: 0; left: -100%; width: 100%; height: 100vh;
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
+            flex-direction: column; justify-content: center; align-items: center; 
+            transition: left 0.4s ease-in-out; z-index: 101;
+        }
+        
+        .nav-links.active { left: 0; }
+        .nav-link { font-size: 1.5rem; margin-bottom: 20px; }
+        #mobileBtn { display: inline-block !important; margin-top: 20px; }
+
+        .burger.toggle span:nth-child(1) { transform: rotate(-45deg) translate(-6px, 6px); }
+        .burger.toggle span:nth-child(2) { opacity: 0; }
+        .burger.toggle span:nth-child(3) { transform: rotate(45deg) translate(-6px, -6px); }
+        
+        .footer-content { flex-direction: column; justify-content: center; text-align: center; }
+        .floating-social { bottom: 20px; right: 20px; }
+        .float-icon { width: 45px; height: 45px; font-size: 20px; }
+    }
+    </style>
+</head>
+<body>
+    <!-- Индикатор скролла -->
+    <div class="scroll-progress-container">
+        <div class="scroll-progress-bar" id="myBar"></div>
+    </div>
+
+    <!-- Фоновое видео -->
+    <div class="video-bg">
+        <video src="resources/media/videos/v.mp4.html" autoplay muted loop playsinline ></video>
+    </div>
+    <div class="video-overlay"></div>
+
+    <header id="mainHeader">
+        <nav class="container">
+            <a href="#" class="logo-wrapper">
+                <div class="logo-img">
+                    <img src="resources/media/images/logo.html" alt="ProUchet Logo" onmousedown="return false;" onselectstart="return false;">
+                </div>
+                <span class="logo-text">Pro<span>Uchet</span></span>
+            </a>
+            
+            <div class="nav-links" id="navMenu">
+                <a href="#home" class="nav-link">Главная</a>
+                <a href="#features" class="nav-link">Плюсы</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <a href="#courses" class="nav-link">Курсы</a>
+                <!-- Кнопка только для мобильного меню -->
+                <a href="#contact" class="btn btn-primary" style="display: none;" id="mobileBtn">Консультация</a>
+            </div>
+            
+            <!-- Кнопка только для десктопа -->
+            <a href="#contact" class="btn btn-primary nav-btn desktop">Консультация</a>
+            
+            <!-- Бургер -->
+            <div class="burger" id="burger">
+                <span></span><span></span><span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="container">
+                <div class="hero-content reveal active">
+                    <h1>Станьте экспертом в <span class="text-gradient">бухгалтерии</span> с нуля</h1>
+                    <p>Мечтаете о карьере в бухгалтерии? Наши курсы — ваш трамплин к успеху! Мы поможем вам освоить все тонкости учета, от азов до продвинутых техник, и стать настоящим профи</p>
+                    <div class="hero-btns" oncontextmenu="return false;">
+                        <a href="#courses" class="btn btn-primary">Выбрать программу</a>
+                        <a href="#features" class="btn btn-secondary">Узнать больше</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features section-padding" id="features">
+            <div class="container">
+                <h2 class="section-title reveal">Почему мы?</h2>
+                <div class="glass-card feature-card-description reveal">
+                    <div class="card-inner">
+                        <div class="card-text">
+                            <div class="logo-img-big">
+                                <img src="resources/media/images/logo.html" alt="ProUchet Logo" onmousedown="return false;" onselectstart="return false;">
+                            </div>
+                            <h3>Ваш путь к успеху!</h3>
+                            <p>Наш курс «PROUCHET» разработан экспертами с многолетним опытом в бухгалтерии и налогообложении. Мы постоянно обновляем программу, чтобы вы всегда были в курсе последних изменений в законодательстве. Вы получите не только теоретические знания, но и мощную практическую базу...</p>
+                        </div>
+                        <div class="card-video">
+                            <video src="resources/media/videos/video2.mp4.html" autoplay muted loop playsinline></video>
+                        </div>
+                    </div>
+                </div>
+                <div class="features-grid">
+                    <div class="glass-card reveal">
+                        <div class="icon-box"><i class="fas fa-laptop-code"></i></div>
+                        <h3>Облачная 1С</h3>
+                        <p>Практика в самой свежей версии 8.3 без установки программ на компьютер.</p>
+                    </div>
+                    <div class="glass-card reveal" style="transition-delay: 0.1s;">
+                        <div class="icon-box"><i class="fas fa-rocket"></i></div>
+                        <h3>Быстрый старт</h3>
+                        <p>Выходим на первый доход в профессии уже через 2 месяца обучения.</p>
+                    </div>
+                    <div class="glass-card reveal" style="transition-delay: 0.2s;">
+                        <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Поддержка</h3>
+                        <p>Личный куратор-эксперт отвечает на вопросы в течение 15 минут.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="process-section section-padding" id="process">
+          <div class="container">
+            <div class="process-header reveal">
+              <span class="badge">Легко и просто</span>
+              <h2 class="section-title">Наш процесс</h2>
+              <p class="section-description">Мы разработали понятный и эффективный путь к освоению бухгалтерского искусства. От первого шага до уверенного специалиста — мы с вами на каждом этапе.</p>
+            </div>
+
+            <div class="steps-grid">
+              <div class="glass-card reveal">
+                <div class="step-number">1</div>
+                <h3 class="step-title">Запись на курс</h3>
+                <p class="step-text">Выберите подходящий курс и заполните простую форму для регистрации.</p>
+              </div>
+
+              <div class="glass-card reveal" style="transition-delay: 0.1s;">
+                <div class="step-number">2</div>
+                <h3 class="step-title">Интенсивное обучение</h3>
+                <p class="step-text">Освойте теорию и практику с нашими опытными преподавателями.</p>
+              </div>
+
+              <div class="glass-card reveal" style="transition-delay: 0.2s;">
+                <div class="step-number">3</div>
+                <h3 class="step-title">Практика</h3>
+                <p class="step-text">Примените знания на реальных задачах и получите ценный опыт.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="faq section-padding reveal" id="faq">
+            <div class="container">
+                <h2 class="section-title">Часто задаваемые вопросы</h2>
+                <p class="section-description">Здесь вы найдете ответы на самые частые вопросы о наших курсах и процессе обучения. Если что-то не нашли, пишите нам!</p>
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Какие курсы вы предлагаете?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Мы предлагаем широкий спектр курсов: от базового бухгалтерского учета для начинающих до продвинутых программ по налогообложению и работе с 1С. Каждый курс разработан с учетом актуальных требований рынка.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Нужен ли опыт для начала обучения?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Нет, опыт не требуется! Наши курсы подходят как для полных новичков, так и для тех, кто хочет обновить или углубить свои знания в бухгалтерии.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Как долго длится обучение?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Длительность курсов варьируется от 1 до 2 месяцев в зависимости от выбранной программы и вашей интенсивности обучения.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Вы помогаете с трудоустройством?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Да, мы активно сотрудничаем с ведущими компаниями и предоставляем нашим выпускникам помощь в поиске работы. Наши специалисты помогут вам составить резюме и подготовиться к собеседованию.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Можно ли учиться онлайн?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Конечно! У нас есть гибкие онлайн-программы, которые позволяют учиться в удобном для вас темпе из любой точки мира, сохраняя при этом высокое качество обучения.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="courses section-padding reveal" id="courses">
+            <div class="container">
+                <h2 class="section-title">Наши учебные программы</h2>
+                <p class="section-description">Наши курсы — это не просто лекции, это полное погружение в мир цифр, законов и финансовых стратегий.</p>
+                <div class="courses-grid">
+                    <div class="glass-card course-card">
+                        <h3>Basic</h3>
+                        <p>Основы бухгалтерии и налогов ИП</p>
+                        <span class="price"> 99.000 тг</span>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i> Понимание основ бухгалтерского учета</li>
+                            <li><i class="fas fa-check"></i> Знание налогов ИП</li>
+                            <li><i class="fas fa-check"></i> Умение сдавать отчётность (910/911)</li>
+                            <li><i class="fas fa-check"></i> Понимание требований НК РК</li>
+                            <li><i class="fas fa-check"></i> Уверенный старт в бухгалтерии</li>
+                            <li><i class="fas fa-check"></i> Уверенный старт в бухгалтерии</li>
+                            <li><i class="fas fa-check"></i> Сертификат Basic по окончанию</li>
+                        </ul>
+                        <a href="https://t.me/pro_uchet_bot" target="_blank" class="btn btn-primary full-width"><i class="fas fa-shopping-cart" style="margin-right: 8px;"></i>Купить курс</a>
+                    </div>
+                    
+                    <div class="glass-card course-card">
+                        <h3>Standart</h3>
+                        <p>Бухгалтер ИП и ТОО</p>
+                        <span class="price">199.000 тг</span>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i> Ведение ИП и ТОО</li>
+                            <li><i class="fas fa-check"></i> Работа с КПН, ИПН, НДС</li>
+                            <li><i class="fas fa-check"></i> Сдача отчетности (100/200/300)</li>
+                            <li><i class="fas fa-check"></i> Расчет заработной платы и налогов</li>
+                            <li><i class="fas fa-check"></i> Практика на реальных кейсах</li>
+                            <li><i class="fas fa-check"></i> Готовность работать бухгалтером</li>
+                            <li><i class="fas fa-check"></i> Сертификат Standard по окончанию</li>
+                        </ul>
+                        <a href="https://t.me/pro_uchet_bot" target="_blank" class="btn btn-primary full-width"><i class="fas fa-shopping-cart" style="margin-right: 8px;"></i>Купить курс</a>
+                    </div>
+
+                    <div class="glass-card course-card">
+                        <div class="course-tag">Популярный</div>
+                        <h3>PRO</h3>
+                        <p>Профессиональный бухгалтер + налоговые проверки</p>
+                        <span class="price">269.000 тг</span>
+                        <ul class="course-features">
+                            <li><i class="fas fa-check"></i> Уровень главного бухгалтера</li>
+                            <li><i class="fas fa-check"></i> Налоговое планирование</li>
+                            <li><i class="fas fa-check"></i> Продвинутый НДС</li>
+                            <li><i class="fas fa-check"></i> Подготовка и сопровождение проверок</li>
+                            <li><i class="fas fa-check"></i> Работа в 1C</li>
+                            <li><i class="fas fa-check"></i> Ведение клиентов на аутсорсе</li>
+                            <li><i class="fas fa-check"></i> Защита итогового проекта</li>
+                            <li><i class="fas fa-check"></i> Сертификат PRO по окончанию</li>
+                        </ul>
+                        <a href="https://t.me/pro_uchet_bot" target="_blank" class="btn btn-primary full-width"><i class="fas fa-shopping-cart" style="margin-right: 8px;"></i>Купить курс</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <section class="contact section-padding reveal" id="contact">
+        <div class="container">
+            <div class="glass-card contact-wrapper">
+                <div class="contact-info">
+                    <h2 class="section-title" style="text-align: left; margin-bottom: 20px;">Остались вопросы?</h2>
+                    <p>Оставьте заявку, и наш методист поможет подобрать программу обучения именно под ваш запрос.</p>
+                
+                    <div class="social-links">
+                        <a href="https://wa.me/+77775159566?text=%d0%97%d0%b4%d1%80%d0%b0%d0%b2%d1%81%d1%82%d0%b2%d1%83%d0%b9%d1%82%d0%b5!%0A%d0%bf%d0%b8%d1%88%d1%83%20%d0%b2%d0%b0%d0%bc%20%d0%bf%d0%be%20%d0%bf%d0%be%d0%b2%d0%be%d0%b4%d1%83%20%d0%ba%d1%83%d1%80%d1%81%d0%be%d0%b2." class="social-btn wa" target="_blank">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                        <a href="https://t.me/pro_uchet_bot" class="social-btn tg" target="_blank">
+                            <i class="fab fa-telegram-plane"></i> Telegram
+                        </a>
+                    </div>
+                </div>
+
+                <form class="contact-form" id="buhForm" novalidate>
+                    <div class="form-group">
+                        <input id="userName" type="text" placeholder="Ваше имя" required>
+                        <div class="error-message" id="nameError">Пожалуйста, введите имя</div>
+                    </div>
+                    <div class="form-group">
+                        <input id="userPhone" type="tel" placeholder="+7 (___) ___-__-__" required>
+                        <div class="error-message" id="phoneError">Введите номер телефона</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary full-width">Отправить заявку</button>
+                    <p class="form-note">Нажимая кнопку, вы соглашаетесь с <a class="form-policy" href="privacy-policy.html">политикой конфиденциальности</a></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+   <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Брендинг -->
+                <div class="footer-brand">
+                    <div class="logo-text">Pro<span>Uchet</span></div>
+                    <p>Профессиональное обучение бухгалтерии в Казахстане. От азов до уровня главного бухгалтера за 2 месяца.</p>
+                </div>
+
+                <!-- Навигация -->
+                <div>
+                    <h4 class="footer-title">Навигация</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home">Главная</a></li>
+                        <li><a href="#features">Преимущества</a></li>
+                        <li><a href="#courses">Курсы</a></li>
+                        <li><a href="#faq">Вопросы и ответы</a></li>
+                    </ul>
+                </div>
+
+                <!-- Помощь -->
+                <div>
+                    <h4 class="footer-title">Поддержка</h4>
+                    <ul class="footer-links">
+                        <li><a href="privacy-policy.html">Конфиденциальность</a></li>
+                        <li><a href="#contact">Задать вопрос</a></li>
+                        <li><a href="https://t.me/pro_uchet_bot">Наш бот</a></li>
+                    </ul>
+                </div>
+
+                <!-- Контакты -->
+                <div>
+                    <h4 class="footer-title">Контакты</h4>
+                    <div class="footer-contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>г. Кокшетау, ул. Наурызбай Батыра 130</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>+7 777 515 95 66</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>info@prouchet.kz</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Нижняя панель -->
+            <div class="footer-bottom">
+                <p class="copyright">&copy; 2026 ProUchet. Все права защищены.</p>
+                <div class="footer-legal">
+                    <a href="https://t.me/pro_uchet_bot"><i class="fab fa-telegram"></i></a>
+                    <a href="https://wa.me/+77775159566"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Плавающие виджеты -->
+    <div class="floating-social">
+        <a href="https://wa.me/+77775159566?text=%d0%97%d0%b4%d1%80%d0%b0%d0%b2%d1%81%d1%82%d0%b2%d1%83%d0%b9%d1%82%d0%b5!%0A%d0%bf%d0%b8%d1%88%d1%83%20%d0%b2%d0%b0%d0%bc%20%d0%bf%d0%be%20%d0%bf%d0%be%d0%b2%d0%be%d0%b4%d1%83%20%d0%ba%d1%83%d1%80%d1%81%d0%be%d0%b2." class="float-icon wa" target="_blank" title="Написать в WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="https://t.me/pro_uchet_bot" class="float-icon tg" target="_blank" title="Написать в Telegram">
+            <i class="fab fa-telegram-plane"></i>
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        
+        // 1. Адаптивное Бургер-меню
+        const burger = document.getElementById('burger');
+        const navMenu = document.getElementById('navMenu');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const blocksToProtect = document.querySelectorAll('.section-title, .section-description, .nav-links, .contact-wrapper');
+
+        blocksToProtect.forEach(block => {
+            block.style.webkitUserSelect = 'none'; // для Safari
+            block.style.msUserSelect = 'none';     // для старого IE
+            block.style.mozUserSelect = 'none';    // для Firefox
+            block.style.userSelect = 'none';       // стандарт
+            block.style.webkitTouchCallout = 'none';
+        });
+
+
+        burger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            burger.classList.toggle('toggle');
+
+            document.body.classList.toggle('no-scroll');
+        });
+
+        // Закрываем меню при клике на любую ссылку в мобилке
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                burger.classList.remove('toggle');
+                document.body.classList.remove('no-scroll');
+            });
+        });
+    
+        // 2. Аккордеон FAQ
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                // Закрываем все
+                faqItems.forEach(el => el.classList.remove('active'));
+                // Открываем нажатый
+                if (!isActive) item.classList.add('active');
+            });
+        });
+
+        // 3. Анимация появления при скролле и прогресс бар
+        const observerOptions = { threshold: 0.15 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // 4. Логика скролл-бара и стилизации шапки
+        window.addEventListener('scroll', () => {
+            // Прогресс скролла
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("myBar").style.width = scrolled + "%";
+
+            // Стилизация шапки (Blur)
+            const header = document.getElementById("mainHeader");
+            if (window.scrollY > 50) {
+                header.classList.add("scrolled");
+            } else {
+                header.classList.remove("scrolled");
+            }
+        });
+    });
+    </script>
+    <script type="module" src="../scripts/fbdb.js"></script>
+</body>
+
+<!-- Mirrored from https://prouchetkokshe.pages.dev/css/style.css by HTTrack Website Copier/3.x [XR&CO], Wed, 14 Oct 2026 15:10:57 GMT -->
+</html>

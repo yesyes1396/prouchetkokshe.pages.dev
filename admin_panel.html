@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель | ProUchet</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --panel: #ffffff;
+            --panel-soft: #eef6ff;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --text: #0f172a;
+            --text-soft: #475569;
+            --line: #e2e8f0;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body { min-height: 100vh; }
+        .admin-shell { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 18px 22px;
+            box-shadow: 0 10px 25px rgba(15,23,42,0.04);
+        }
+        .topbar h1 {
+            margin: 0;
+            font-size: clamp(1.4rem, 2vw, 2rem);
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .badge, .soft-btn, .danger-btn, .primary-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .badge {
+            background: var(--panel-soft);
+            color: var(--primary-dark);
+        }
+        .soft-btn { background: #eff6ff; color: var(--primary-dark); }
+        .primary-btn { background: var(--primary); color: white; }
+        .danger-btn { background: #fee2e2; color: var(--danger); }
+        .layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 22px;
+            margin-top: 22px;
+        }
+        .sidebar {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 18px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        .sidebar h3 {
+            margin: 0 0 16px;
+            font-size: 1rem;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sidebar a {
+            display: block;
+            text-decoration: none;
+            color: var(--text-soft);
+            background: #f8fafc;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 12px 14px;
+            transition: 0.2s ease;
+        }
+        .sidebar a.active, .sidebar a:hover {
+            background: #eff6ff;
+            color: var(--primary-dark);
+            border-color: #dbeafe;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(180px, 1fr));
+            gap: 16px;
+        }
+        .stat-card {
+            background: var(--panel);
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            padding: 18px;
+        }
+        .stat-card .label {
+            color: var(--text-soft);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .stat-card .value {
+            margin-top: 12px;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .panel-box {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 18px;
+        }
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .panel-head h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toolbar input, .toolbar select {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            background: white;
+            color: var(--text);
+        }
+        .toolbar input { min-width: 220px; }
+
+        .section-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .section-box {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 18px;
+            background: #fbfdff;
+        }
+        .section-box-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .section-box-header h3 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .content-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+            min-height: 180px;
+        }
+        .content-card h4 {
+            margin: 0 0 10px;
+            font-size: 1.1rem;
+        }
+        .content-card p {
+            margin: 0;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+        .content-card .meta {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: var(--text-soft);
+            font-size: 0.8rem;
+        }
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .mini-btn {
+            border: 1px solid var(--line);
+            background: white;
+            color: var(--text-soft);
+            border-radius: 10px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .mini-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+        .mini-btn.danger { background: #ffefef; color: var(--danger); border-color: #fecaca; }
+        .mini-btn.warning { background: #fff7ed; color: var(--warning); border-color: #fed7aa; }
+        .add-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            background: white;
+            color: var(--primary-dark);
+            font-size: 2.5rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .applications-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+        .applications-table th, .applications-table td {
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            padding: 14px 10px;
+            vertical-align: top;
+        }
+        .applications-table th {
+            color: var(--text-soft);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .status.new { background: #dcfce7; color: #166534; }
+        .status.review { background: #fef3c7; color: #92400e; }
+        .status.done { background: #dbeafe; color: #1d4ed8; }
+
+        @media (max-width: 960px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            .stats-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+            .toolbar { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-shell">
+        <header class="topbar">
+            <h1>Админ-панель ProUchet</h1>
+            <div class="topbar-actions">
+                <span class="badge">Supabase-ready</span>
+                <button class="soft-btn" type="button" id="syncBtn">Синхронизация</button>
+                <button class="danger-btn" type="button" id="logoutBtn">Выход</button>
+            </div>
+        </header>
+
+        <div class="layout">
+            <aside class="sidebar">
+                <h3>Меню</h3>
+                <nav>
+                    <a href="#overview" class="active">Обзор</a>
+                    <a href="#content">Контент</a>
+                    <a href="#applications">Заявки</a>
+                    <a href="#settings">Настройки</a>
+                </nav>
+            </aside>
+
+            <main class="content">
+                <div class="stats-grid" id="overview">
+                    <div class="stat-card">
+                        <div class="label">Всего секций</div>
+                        <div class="value" id="totalSections">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Карточек</div>
+                        <div class="value" id="totalCards">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Новых заявок</div>
+                        <div class="value" id="newRequests">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Статус</div>
+                        <div class="value" style="font-size:1.2rem;">Черновик</div>
+                    </div>
+                </div>
+
+                <section class="panel-box" id="content">
+                    <div class="panel-head">
+                        <h2>Редактор контента</h2>
+                        <div class="toolbar">
+                            <input id="searchInput" type="search" placeholder="Поиск по ФИО / телефону / названию">
+                            <select id="sortSelect">
+                                <option value="date-desc">По дате ↓</option>
+                                <option value="date-asc">По дате ↑</option>
+                                <option value="alpha">По алфавиту</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-stack" id="contentSections"></div>
+                </section>
+
+                <section class="panel-box" id="applications">
+                    <div class="panel-head">
+                        <h2>Заявки</h2>
+                        <div class="toolbar">
+                            <select id="applicationFilter">
+                                <option value="all">Все статусы</option>
+                                <option value="new">Новые</option>
+                                <option value="review">Проверяются</option>
+                                <option value="done">Обработаны</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="applications-table">
+                        <thead>
+                            <tr>
+                                <th>ФИО</th>
+                                <th>Телефон</th>
+                                <th>Дата</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsBody"></tbody>
+                    </table>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="scripts/config.js"></script>
+    <script>
+        const contentState = {
+            benefits: [
+                { id: 1, title: 'Облачная 1С', text: 'Практика в самой свежей версии 8.3 без установки программ на компьютер.', updated: '2026-10-12' },
+                { id: 2, title: 'Быстрый старт', text: 'Выходим на первый доход в профессии уже через 2 месяца обучения.', updated: '2026-10-11' },
+                { id: 3, title: 'Поддержка', text: 'Личный куратор-эксперт отвечает на вопросы в течение 15 минут.', updated: '2026-10-10' }
+            ],
+            faq: [
+                { id: 1, title: 'Какие курсы вы предлагаете?', text: 'Мы предлагаем базовый, стандартный и PRO-level курсы по бухгалтерии и налогам.', updated: '2026-10-08' },
+                { id: 2, title: 'Нужен ли опыт?', text: 'Нет, курсы рассчитаны на начинающих и тех, кто хочет обновить знания.', updated: '2026-10-07' },
+                { id: 3, title: 'Можно ли учиться онлайн?', text: 'Да, мы предлагаем гибкий формат обучения с поддержкой преподавателя.', updated: '2026-10-06' }
+            ],
+            courses: [
+                { id: 1, title: 'Basic', text: 'Основы бухгалтерии и налогов ИП.', price: '99.000 тг', updated: '2026-10-12' },
+                { id: 2, title: 'Standart', text: 'Бухгалтер ИП и ТОО.', price: '199.000 тг', updated: '2026-10-11' },
+                { id: 3, title: 'PRO', text: 'Профессиональный бухгалтер + налоговые проверки.', price: '269.000 тг', updated: '2026-10-10' }
+            ]
+        };
+
+        const applications = [
+            { id: 1, name: 'Иван Петров', phone: '+7 777 111 22 33', date: '2026-10-14', status: 'new' },
+            { id: 2, name: 'Алия Нурланова', phone: '+7 707 555 77 88', date: '2026-10-13', status: 'review' },
+            { id: 3, name: 'Максим Сидоров', phone: '+7 705 444 66 55', date: '2026-10-10', status: 'done' },
+            { id: 4, name: 'Динара Тулеуова', phone: '+7 701 222 99 88', date: '2026-10-09', status: 'new' }
+        ];
+
+        const sectionLabels = {
+            benefits: 'Плюсы',
+            faq: 'FAQ',
+            courses: 'Курсы'
+        };
+
+        function renderContentSections() {
+            const container = document.getElementById('contentSections');
+            const search = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
+            const sortMode = document.getElementById('sortSelect')?.value || 'date-desc';
+
+            const renderList = (key) => {
+                let items = [...contentState[key]];
+
+                if (search) {
+                    items = items.filter(item => {
+                        const haystack = `${item.title} ${item.text} ${item.price || ''}`.toLowerCase();
+                        return haystack.includes(search);
+                    });
+                }
+
+                if (sortMode === 'alpha') {
+                    items.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+                } else if (sortMode === 'date-asc') {
+                    items.sort((a, b) => new Date(a.updated) - new Date(b.updated));
+                } else {
+                    items.sort((a, b) => new Date(b.updated) - new Date(a.updated));
+                }
+
+                return items.map(item => `
+                    <div class="content-card">
+                        <h4>${item.title}</h4>
+                        <p>${item.text}</p>
+                        ${item.price ? `<div class="meta"><span>Цена</span><strong>${item.price}</strong></div>` : `<div class="meta"><span>Обновлено</span><strong>${item.updated}</strong></div>`}
+                        <div class="card-actions">
+                            <button class="mini-btn primary" data-action="edit" data-section="${key}" data-id="${item.id}">Редактировать</button>
+                            <button class="mini-btn warning" data-action="move" data-section="${key}" data-id="${item.id}">Переместить</button>
+                            <button class="mini-btn danger" data-action="delete" data-section="${key}" data-id="${item.id}">Удалить</button>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            const html = Object.entries(sectionLabels).map(([key, label]) => `
+                <div class="section-box">
+                    <div class="section-box-header">
+                        <h3>${label}</h3>
+                        <button class="primary-btn" type="button" data-action="add" data-section="${key}">+ Добавить</button>
+                    </div>
+                    <div class="cards-grid">
+                        ${renderList(key)}
+                        <button class="add-card" type="button" data-action="add" data-section="${key}" aria-label="Добавить карточку">+</button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+            updateStats();
+        }
+
+        function renderApplications() {
+            const filterValue = document.getElementById('applicationFilter')?.value || 'all';
+            const filtered = applications.filter(item => filterValue === 'all' || item.status === filterValue);
+
+            document.getElementById('applicationsBody').innerHTML = filtered.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.phone}</td>
+                    <td>${item.date}</td>
+                    <td><span class="status ${item.status}">${statusLabel(item.status)}</span></td>
+                    <td>
+                        <button class="mini-btn" type="button" data-application-id="${item.id}">Открыть</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function statusLabel(status) {
+            if (status === 'new') return 'Новая';
+            if (status === 'review') return 'Проверяется';
+            return 'Обработана';
+        }
+
+        function updateStats() {
+            const totalCards = Object.values(contentState).reduce((sum, items) => sum + items.length, 0);
+            const totalSections = Object.keys(contentState).length;
+            const newRequests = applications.filter(item => item.status === 'new').length;
+
+            document.getElementById('totalSections').textContent = String(totalSections);
+            document.getElementById('totalCards').textContent = String(totalCards);
+            document.getElementById('newRequests').textContent = String(newRequests);
+        }
+
+        document.body.addEventListener('click', (event) => {
+            const actionTarget = event.target.closest('[data-action]');
+            if (!actionTarget) return;
+
+            const { action, section, id } = actionTarget.dataset;
+
+            if (action === 'add') {
+                const list = contentState[section];
+                list.push({
+                    id: Date.now(),
+                    title: `${sectionLabels[section]} #${list.length + 1}`,
+                    text: 'Новый блок. Замените текст после подключения Supabase.',
+                    updated: new Date().toISOString().slice(0, 10)
+                });
+                renderContentSections();
+                return;
+            }
+
+            if (action === 'delete') {
+                const list = contentState[section];
+                contentState[section] = list.filter(item => String(item.id) !== String(id));
+                renderContentSections();
+            }
+
+            if (action === 'edit') {
+                alert('Подключите редактор через Supabase и сформируйте modal для редактирования блока.');
+            }
+
+            if (action === 'move') {
+                alert('Перемещение карточки будет добавлено после привязки к Supabase / drag-and-drop логике.');
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('input', renderContentSections);
+        document.getElementById('sortSelect').addEventListener('change', renderContentSections);
+        document.getElementById('applicationFilter').addEventListener('change', renderApplications);
+
+        document.getElementById('syncBtn').addEventListener('click', () => {
+            alert('Синхронизация с Supabase будет активна после установки ключей и таблиц в проекте.');
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        renderContentSections();
+        renderApplications();
+    </script>
+</body>
+</html>

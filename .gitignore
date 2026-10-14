@@ -1,0 +1,23 @@
+# Local environment files
+.env
+.env.*
+*.local
+*.secret
+
+# Build and dependency folders
+node_modules/
+dist/
+build/
+.vite/
+
+# Editor and system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+
+# Project-specific generated files
+*.bak
+*.tmp
