@@ -1,11 +1,8 @@
 window.APP_CONFIG = {
   appName: 'ProUchet',
-  adminLogin: '123',
-  adminPassword: '123',
-  supabaseUrl: 'https://YOUR_PROJECT_REF.supabase.co',
-  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
-  contactApiUrl: 'https://YOUR_CLOUDFLARE_WORKER_URL',
+  supabaseUrl: 'https://nckoyjwohewvrkorxqur.supabase.co',
+  supabaseAnonKey: 'sb_publishable_Ah92dcHzGsM7lE3auXRW2Q_jeVuRGUO',
   adminPanelPath: '/admin_panel.html',
   realtimeEnabled: false,
-  notes: 'Заменить значения после подключения Supabase и Cloudflare Worker.'
+  notes: 'В браузере используется только публичный publishable key. Secret keys хранить только на сервере.'
 };

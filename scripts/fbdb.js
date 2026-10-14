@@ -1,6 +1,3 @@
-const APP_CONFIG = window.APP_CONFIG || {};
-const API_URL = APP_CONFIG.contactApiUrl || 'https://YOUR_CLOUDFLARE_WORKER_URL';
-
 const contactForm = document.getElementById('buhForm');
 
 const showError = (inputElement, errorElement) => {
@@ -25,13 +22,6 @@ if (contactForm) {
         const nameValue = nameInput.value.trim();
         const phoneValue = phoneInput.value.trim();
 
-        // --- ПРОВЕРКА НА АДМИНА ---
-        if (nameValue === 'PROUCHETADMIN' && phoneValue === '03032026') {
-            window.location.href = 'admin_panel.html';
-            return;
-        }
-
-        // --- ВАЛИДАЦИЯ ---
         let isValid = true;
         if (nameValue.length < 2) {
             showError(nameInput, nameError);
@@ -43,40 +33,32 @@ if (contactForm) {
         }
         if (!isValid) return;
 
+        if (contactForm.elements.website?.value) return;
+
         const originalText = submitBtn.innerText;
         submitBtn.disabled = true;
-        submitBtn.innerText = 'Проверка...';
+        submitBtn.innerText = 'Отправка...';
 
         try {
-            if (API_URL.includes('YOUR_')) {
-                throw new Error('Сервисный ключ ещё не подключён. Подставьте Cloudflare Worker URL в scripts/config.js');
+            const client = window.supabaseClient;
+            if (!client) {
+                throw new Error('Supabase не настроен');
             }
 
-            const response = await fetch(`${API_URL}/submit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: nameValue,
-                    phone: phoneValue
-                })
+            const { error } = await client.from('applications').insert({
+                full_name: nameValue,
+                phone: phoneValue
             });
-
-            const result = await response.json();
-
-            if (response.status === 403) {
-                submitBtn.innerText = 'Вы уже отправляли заявку!';
-                submitBtn.style.backgroundColor = '#f59e0b';
-            } else if (response.ok) {
-                submitBtn.innerText = 'Готово!';
-                submitBtn.style.backgroundColor = '#28a745';
-                contactForm.reset();
-            } else {
-                throw new Error(result.error || 'Ошибка сервера');
+            if (error) {
+                throw error;
             }
 
+            submitBtn.innerText = 'Заявка отправлена';
+            submitBtn.style.backgroundColor = '#28a745';
+            contactForm.reset();
         } catch (error) {
-            console.error('Ошибка:', error);
-            submitBtn.innerText = 'Проверьте API';
+            console.error('Ошибка отправки заявки:', error);
+            submitBtn.innerText = 'Не удалось отправить';
             submitBtn.style.backgroundColor = '#dc3545';
         } finally {
             setTimeout(() => {

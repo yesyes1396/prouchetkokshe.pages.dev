@@ -29,7 +29,13 @@
         }
 
         body { min-height: 100vh; }
-        .admin-shell { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .admin-shell { display: none; max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .auth-gate { max-width: 420px; margin: 12vh auto; padding: 24px; background: white; border: 1px solid var(--line); border-radius: 16px; }
+        .auth-gate h1 { margin-top: 0; font-size: 1.4rem; }
+        .auth-gate form { display: grid; gap: 12px; }
+        .auth-gate input { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 12px; font: inherit; }
+        .auth-message { min-height: 1.4em; color: var(--danger); }
+        .application-status { border: 1px solid var(--line); border-radius: 8px; padding: 7px; background: white; }
         .topbar {
             display: flex;
             align-items: center;
@@ -293,6 +299,15 @@
     </style>
 </head>
 <body>
+    <section class="auth-gate" id="authGate">
+        <h1>Вход администратора</h1>
+        <form id="adminAuthForm">
+            <input type="email" name="email" placeholder="Email администратора" autocomplete="username" required>
+            <input type="password" name="password" placeholder="Пароль" autocomplete="current-password" required>
+            <button class="primary-btn" type="submit">Войти</button>
+            <div class="auth-message" id="authMessage" role="status" aria-live="polite"></div>
+        </form>
+    </section>
     <div class="admin-shell">
         <header class="topbar">
             <h1>Админ-панель ProUchet</h1>
@@ -338,9 +353,9 @@
                     <div class="panel-head">
                         <h2>Редактор контента</h2>
                         <div class="toolbar">
-                            <input id="searchInput" type="search" placeholder="Поиск по ФИО / телефону / названию">
+                            <input id="searchInput" type="search" placeholder="Поиск по контенту и курсам">
                             <select id="sortSelect">
-                                <option value="date-desc">По дате ↓</option>
+                                <option value="order">По порядку</option>
                                 <option value="date-asc">По дате ↑</option>
                                 <option value="alpha">По алфавиту</option>
                             </select>
@@ -356,10 +371,22 @@
                         <div class="toolbar">
                             <select id="applicationFilter">
                                 <option value="all">Все статусы</option>
-                                <option value="new">Новые</option>
-                                <option value="review">Проверяются</option>
-                                <option value="done">Обработаны</option>
+                                <option value="unread">Не прочитано</option>
+                                <option value="viewed">Просмотрено</option>
+                                <option value="archived">Архив</option>
                             </select>
+                            <select id="paymentFilter">
+                                <option value="all">Любая оплата</option>
+                                <option value="pending">Ожидает оплаты</option>
+                                <option value="paid">Оплачено</option>
+                                <option value="rejected">Оплата отклонена</option>
+                            </select>
+                            <select id="applicationSort">
+                                <option value="date-desc">Сначала новые</option>
+                                <option value="date-asc">Сначала старые</option>
+                                <option value="alpha">По алфавиту</option>
+                            </select>
+                            <input id="applicationSearch" type="search" placeholder="Поиск: ФИО или телефон">
                         </div>
                     </div>
                     <table class="applications-table">
@@ -367,8 +394,10 @@
                             <tr>
                                 <th>ФИО</th>
                                 <th>Телефон</th>
+                                <th>Курс</th>
                                 <th>Дата</th>
-                                <th>Статус</th>
+                                <th>Просмотр</th>
+                                <th>Оплата</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
@@ -379,8 +408,7 @@
         </div>
     </div>
 
-    <script src="scripts/config.js"></script>
-    <script>
+    <script type="application/json" id="legacyAdminMock">
         const contentState = {
             benefits: [
                 { id: 1, title: 'Облачная 1С', text: 'Практика в самой свежей версии 8.3 без установки программ на компьютер.', updated: '2026-10-12' },
@@ -547,5 +575,9 @@
         renderContentSections();
         renderApplications();
     </script>
+    <script src="scripts/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="scripts/supabase-client.js"></script>
+    <script src="scripts/admin.js"></script>
 </body>
 </html>

@@ -364,7 +364,7 @@
             <h3 id="adminLoginTitle">Вход в админку</h3>
             <p>Для доступа к панели управления введите логин и пароль.</p>
             <form id="adminLoginForm">
-                <input type="text" id="adminLoginInput" placeholder="Логин" autocomplete="username">
+                <input type="email" id="adminLoginInput" placeholder="Email администратора" autocomplete="username" required>
                 <input type="password" id="adminPasswordInput" placeholder="Пароль" autocomplete="current-password">
                 <button type="submit">Войти</button>
                 <div class="message" id="adminLoginMessage"></div>
@@ -633,6 +633,7 @@
                 </div>
 
                 <form class="contact-form" id="buhForm" novalidate>
+                    <input name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px">
                     <div class="form-group">
                         <input id="userName" type="text" placeholder="Ваше имя" required>
                         <div class="error-message" id="nameError">Пожалуйста, введите имя</div>
@@ -719,10 +720,10 @@
     </div>
 
     <script src="scripts/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="scripts/supabase-client.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const { adminLogin, adminPassword } = window.APP_CONFIG || {};
-
             const logo = document.querySelector('.logo-wrapper');
             const modal = document.getElementById('adminLoginModal');
             const form = document.getElementById('adminLoginForm');
@@ -749,22 +750,28 @@
             }
 
             if (form) {
-                form.addEventListener('submit', (event) => {
+                form.addEventListener('submit', async (event) => {
                     event.preventDefault();
-                    const inputLogin = loginInput.value.trim();
-                    const inputPassword = passwordInput.value.trim();
-
-                    if (inputLogin === String(adminLogin) && inputPassword === String(adminPassword)) {
-                        message.textContent = 'Успешный вход';
-                        message.style.color = '#16a34a';
-                        setTimeout(() => {
-                            window.location.href = 'admin_panel.html';
-                        }, 350);
+                    const client = window.supabaseClient;
+                    if (!client) {
+                        message.textContent = 'Supabase пока не настроен';
+                        message.style.color = '#dc2626';
                         return;
                     }
 
-                    message.textContent = 'Неверный логин или пароль';
-                    message.style.color = '#dc2626';
+                    const { error } = await client.auth.signInWithPassword({
+                        email: loginInput.value.trim(),
+                        password: passwordInput.value
+                    });
+                    if (error) {
+                        message.textContent = 'Не удалось войти. Проверьте email и пароль администратора.';
+                        message.style.color = '#dc2626';
+                        return;
+                    }
+
+                    message.textContent = 'Успешный вход';
+                    message.style.color = '#16a34a';
+                    window.location.href = 'admin_panel.html';
                 });
             }
         
@@ -842,6 +849,7 @@
         });
     });
     </script>
+    <script src="scripts/public-content.js"></script>
     <script type="module" src="scripts/fbdb.js"></script>
 </body>
 

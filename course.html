@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f4f7fb">
+    <title>Курс | ProUchet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root { color-scheme: light; --ink:#17212b; --muted:#52616d; --paper:#f4f7fb; --white:#fff; --line:#dce5eb; --blue:#126e82; --coral:#e56b54; --mint:#dff3ed; }
+        * { box-sizing:border-box; }
+        body { margin:0; color:var(--ink); background:var(--paper); font-family:Arial,Helvetica,sans-serif; }
+        a { color:inherit; }
+        .top { display:flex; justify-content:space-between; align-items:center; padding:22px max(24px,calc((100vw - 1120px)/2)); background:var(--white); border-bottom:1px solid var(--line); }
+        .brand { font-size:1.2rem; font-weight:800; text-decoration:none; color:var(--blue); }
+        .back { color:var(--blue); font-weight:700; text-decoration:none; }
+        main { max-width:1120px; margin:0 auto; padding:40px 24px 70px; }
+        .hero { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr); gap:28px; align-items:start; }
+        .intro, .payment, .application { background:var(--white); border:1px solid var(--line); border-radius:14px; padding:28px; }
+        .category { display:inline-block; color:var(--blue); font-size:.85rem; font-weight:700; text-transform:uppercase; }
+        h1 { margin:12px 0; font-size:clamp(2rem,5vw,3.4rem); }
+        .lead { color:var(--muted); font-size:1.1rem; line-height:1.7; }
+        .price { margin:26px 0 8px; font-size:1.7rem; font-weight:800; color:var(--blue); }
+        .duration { color:var(--muted); }
+        .section { margin-top:28px; }
+        .section h2 { font-size:1.35rem; }
+        .curriculum { padding-left:22px; line-height:1.9; color:var(--muted); }
+        .payment { background:var(--mint); }
+        .payment h2 { margin-top:0; }
+        .qr { display:block; width:min(100%,280px); max-height:300px; object-fit:contain; margin:18px auto; background:#fff; border-radius:8px; }
+        .instructions { white-space:pre-wrap; line-height:1.65; }
+        .application { margin-top:28px; max-width:720px; }
+        .application form { display:grid; gap:12px; }
+        input, button { font:inherit; padding:13px 14px; border-radius:8px; }
+        input { border:1px solid var(--line); }
+        button { border:0; color:white; background:var(--blue); font-weight:700; cursor:pointer; }
+        button:disabled { opacity:.65; cursor:wait; }
+        .message { min-height:1.4em; color:var(--muted); }
+        .empty { text-align:center; padding:80px 20px; }
+        @media(max-width:760px) { .hero { grid-template-columns:1fr; } .top { padding:18px 20px; } main { padding:24px 16px 48px; } .intro,.payment,.application { padding:22px; } }
+    </style>
+</head>
+<body>
+    <header class="top"><a class="brand" href="index.html">ProUchet</a><a class="back" href="index.html#courses">← Все курсы</a></header>
+    <main id="coursePage"><div class="empty">Загрузка курса…</div></main>
+    <script src="scripts/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="scripts/supabase-client.js"></script>
+    <script src="scripts/course.js"></script>
+</body>
+</html>
