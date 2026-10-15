@@ -734,7 +734,20 @@
             const message = document.getElementById('adminLoginMessage');
 
             if (logo) {
-                logo.addEventListener('dblclick', () => {
+                logo.addEventListener('dblclick', async () => {
+                    const client = window.supabaseClient;
+                    if (client) {
+                        const { data: sessionData } = await client.auth.getSession().catch(() => ({ data: null }));
+                        const user = sessionData?.session?.user;
+                        if (user) {
+                            const { data: admin, error } = await client.from('admin_users')
+                                .select('user_id').eq('user_id', user.id).maybeSingle();
+                            if (!error && admin) {
+                                window.location.href = 'admin_panel.html';
+                                return;
+                            }
+                        }
+                    }
                     modal.classList.add('active');
                     modal.setAttribute('aria-hidden', 'false');
                     loginInput.focus();
