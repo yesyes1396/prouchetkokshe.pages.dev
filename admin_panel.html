@@ -71,12 +71,7 @@
         .soft-btn { background: #eff6ff; color: var(--primary-dark); }
         .primary-btn { background: var(--primary); color: white; }
         .danger-btn { background: #fee2e2; color: var(--danger); }
-        .layout {
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 22px;
-            margin-top: 22px;
-        }
+        .layout { margin-top: 16px; }
         .sidebar {
             background: var(--panel);
             border: 1px solid var(--line);
@@ -114,22 +109,18 @@
             border-color: #dbeafe;
         }
 
-        .content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        .content { display: flex; flex-direction: column; gap: 14px; }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(180px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
         }
         .stat-card {
             background: var(--panel);
             border-radius: 16px;
             border: 1px solid var(--line);
-            padding: 18px;
+            padding: 14px 16px;
         }
         .stat-card .label {
             color: var(--text-soft);
@@ -138,23 +129,23 @@
             letter-spacing: 0.08em;
         }
         .stat-card .value {
-            margin-top: 12px;
-            font-size: 2rem;
+            margin-top: 6px;
+            font-size: 1.6rem;
             font-weight: 800;
         }
 
         .panel-box {
             background: var(--panel);
             border: 1px solid var(--line);
-            border-radius: 18px;
-            padding: 18px;
+            border-radius: 12px;
+            padding: 16px;
         }
         .panel-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
         }
         .panel-head h2 {
@@ -180,12 +171,12 @@
         .section-stack {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 12px;
         }
         .section-box {
             border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 18px;
+            border-radius: 10px;
+            padding: 14px;
             background: #fbfdff;
         }
         .section-box-header {
@@ -201,16 +192,16 @@
         }
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
         }
         .content-card {
             background: white;
             border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 14px;
             position: relative;
-            min-height: 180px;
+            min-height: 150px;
         }
         .content-card h4 {
             margin: 0 0 10px;
@@ -262,8 +253,10 @@
             cursor: pointer;
         }
 
+        .table-wrap { overflow-x: auto; }
         .applications-table {
             width: 100%;
+            min-width: 760px;
             border-collapse: collapse;
             margin-top: 8px;
         }
@@ -291,8 +284,6 @@
         .status.done { background: #dbeafe; color: #1d4ed8; }
 
         @media (max-width: 960px) {
-            .layout { grid-template-columns: 1fr; }
-            .sidebar { position: static; }
             .stats-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
             .toolbar { width: 100%; }
         }
@@ -319,16 +310,6 @@
         </header>
 
         <div class="layout">
-            <aside class="sidebar">
-                <h3>Меню</h3>
-                <nav>
-                    <a href="#overview" class="active">Обзор</a>
-                    <a href="#content">Контент</a>
-                    <a href="#applications">Заявки</a>
-                    <a href="#settings">Настройки</a>
-                </nav>
-            </aside>
-
             <main class="content">
                 <div class="stats-grid" id="overview">
                     <div class="stat-card">
@@ -342,10 +323,6 @@
                     <div class="stat-card">
                         <div class="label">Новых заявок</div>
                         <div class="value" id="newRequests">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="label">Статус</div>
-                        <div class="value" style="font-size:1.2rem;">Черновик</div>
                     </div>
                 </div>
 
@@ -389,7 +366,7 @@
                             <input id="applicationSearch" type="search" placeholder="Поиск: ФИО или телефон">
                         </div>
                     </div>
-                    <table class="applications-table">
+                    <div class="table-wrap"><table class="applications-table">
                         <thead>
                             <tr>
                                 <th>ФИО</th>
@@ -402,7 +379,7 @@
                             </tr>
                         </thead>
                         <tbody id="applicationsBody"></tbody>
-                    </table>
+                    </table></div>
                 </section>
             </main>
         </div>

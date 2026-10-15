@@ -15,7 +15,7 @@
         const grid = document.querySelector('.features-grid');
         if (!grid) return;
         grid.innerHTML = data.map((card) => `
-            <article class="glass-card reveal">
+            <article class="glass-card">
                 <div class="icon-box"><i class="${escapeHtml(card.icon)}" aria-hidden="true"></i></div>
                 <h3>${escapeHtml(card.title)}</h3>
                 <p>${escapeHtml(card.body)}</p>
