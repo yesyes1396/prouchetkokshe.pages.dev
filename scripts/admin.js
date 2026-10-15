@@ -192,14 +192,34 @@
         return `<label>${label}<input name="${name}" type="${options.type || 'text'}" value="${safeValue}" ${options.required ? 'required' : ''} ${options.min !== undefined ? `min="${options.min}"` : ''}></label>`;
     }
 
+    async function applyOrder(type, section, savedItem, requestedPosition) {
+        const group = type === 'courses'
+            ? state.courses
+            : state.cards.filter((card) => card.section === section);
+        const ordered = group
+            .filter((record) => record.id !== savedItem.id)
+            .sort((first, second) => first.sort_order - second.sort_order);
+        const requested = Number(requestedPosition);
+        const position = Math.min(Math.max(Number.isFinite(requested) ? Math.trunc(requested) : ordered.length + 1, 1), ordered.length + 1);
+        ordered.splice(position - 1, 0, savedItem);
+
+        for (let index = 0; index < ordered.length; index += 1) {
+            const { error } = await client.from(type)
+                .update({ sort_order: index + 1 })
+                .eq('id', ordered[index].id);
+            if (error) return error;
+        }
+        return null;
+    }
+
     async function editItem(type, item = null, section = null) {
         const isCourse = type === 'courses';
         const editor = document.createElement('dialog');
         editor.style.cssText = 'border:0;border-radius:14px;width:min(680px,calc(100% - 24px));max-height:90vh;padding:24px;box-shadow:0 20px 60px #0f172a40';
         const itemValues = item || { icon: 'fa-solid fa-circle-check', is_published: true, sort_order: isCourse ? state.courses.length + 1 : state.cards.filter((card) => card.section === section).length + 1 };
         const fields = isCourse
-            ? [editorField('Название', 'title', itemValues.title, { required: true }), editorField('Ссылка slug', 'slug', itemValues.slug, { required: true }), editorField('Категория', 'category', itemValues.category || 'Бухгалтерия', { required: true }), editorField('Короткое описание', 'short_description', itemValues.short_description, { type: 'textarea' }), editorField('Описание страницы', 'description', itemValues.description, { type: 'textarea', rows: 5 }), editorField('Программа, один пункт на строку', 'curriculum', (itemValues.curriculum || []).join('\n'), { type: 'textarea', rows: 6 }), editorField('Длительность', 'duration', itemValues.duration), editorField('Цена', 'price', itemValues.price, { type: 'number', min: 0, required: true }), editorField('Валюта', 'currency', itemValues.currency || 'KZT'), editorField('Инструкция по оплате', 'payment_instructions', itemValues.payment_instructions, { type: 'textarea', rows: 4 }), editorField('Публичная ссылка на Kaspi QR', 'kaspi_qr_url', itemValues.kaspi_qr_url), editorField('Загрузить/заменить QR (PNG, JPG или WebP)', 'kaspi_qr_file', '', { type: 'file' }), editorField('Порядок', 'sort_order', itemValues.sort_order, { type: 'number' }), editorField('Опубликовано', 'is_published', itemValues.is_published, { type: 'checkbox' })]
-            : [editorField('Иконка Font Awesome', 'icon', itemValues.icon), editorField('Заголовок', 'title', itemValues.title, { required: true }), editorField('Текст', 'body', itemValues.body, { type: 'textarea', rows: 5, required: true }), editorField('Порядок', 'sort_order', itemValues.sort_order, { type: 'number' }), editorField('Опубликовано', 'is_published', itemValues.is_published, { type: 'checkbox' })];
+            ? [editorField('Название', 'title', itemValues.title, { required: true }), editorField('Ссылка slug', 'slug', itemValues.slug, { required: true }), editorField('Категория', 'category', itemValues.category || 'Бухгалтерия', { required: true }), editorField('Короткое описание', 'short_description', itemValues.short_description, { type: 'textarea' }), editorField('Описание страницы', 'description', itemValues.description, { type: 'textarea', rows: 5 }), editorField('Программа, один пункт на строку', 'curriculum', (itemValues.curriculum || []).join('\n'), { type: 'textarea', rows: 6 }), editorField('Длительность', 'duration', itemValues.duration), editorField('Цена', 'price', itemValues.price, { type: 'number', min: 0, required: true }), editorField('Валюта', 'currency', itemValues.currency || 'KZT'), editorField('Инструкция по оплате', 'payment_instructions', itemValues.payment_instructions, { type: 'textarea', rows: 4 }), editorField('Публичная ссылка на Kaspi QR', 'kaspi_qr_url', itemValues.kaspi_qr_url), editorField('Загрузить/заменить QR (PNG, JPG или WebP)', 'kaspi_qr_file', '', { type: 'file' }), editorField('Порядок', 'sort_order', itemValues.sort_order, { type: 'number', min: 1 }), editorField('Опубликовано', 'is_published', itemValues.is_published, { type: 'checkbox' })]
+            : [editorField('Иконка Font Awesome', 'icon', itemValues.icon), editorField('Заголовок', 'title', itemValues.title, { required: true }), editorField('Текст', 'body', itemValues.body, { type: 'textarea', rows: 5, required: true }), editorField('Порядок', 'sort_order', itemValues.sort_order, { type: 'number', min: 1 }), editorField('Опубликовано', 'is_published', itemValues.is_published, { type: 'checkbox' })];
         editor.innerHTML = `
             <form method="dialog" class="editor-form">
                 <style>.editor-form{display:grid;gap:12px}.editor-form h2{margin:0 0 6px}.editor-form label{display:grid;gap:6px;font-weight:600}.editor-form input:not([type=checkbox]),.editor-form textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.editor-form [type=checkbox]{justify-self:start}.editor-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}</style>
@@ -227,14 +247,14 @@
                 currency: String(data.get('currency')).trim() || 'KZT',
                 payment_instructions: String(data.get('payment_instructions')).trim(),
                 kaspi_qr_url: String(data.get('kaspi_qr_url')).trim(),
-                sort_order: Number(data.get('sort_order')) || 0,
+                sort_order: data.get('sort_order') === '' ? (item?.sort_order || state.courses.length + 1) : Number(data.get('sort_order')),
                 is_published: published
             } : {
                 section,
                 icon: String(data.get('icon')).trim(),
                 title: String(data.get('title')).trim(),
                 body: String(data.get('body')).trim(),
-                sort_order: Number(data.get('sort_order')) || 0,
+                sort_order: data.get('sort_order') === '' ? (item?.sort_order || state.cards.filter((card) => card.section === section).length + 1) : Number(data.get('sort_order')),
                 is_published: published
             };
             if (isCourse) {
@@ -254,11 +274,17 @@
                 }
             }
             const query = item
-                ? client.from(type).update(values).eq('id', item.id)
-                : client.from(type).insert(values);
-            const { error } = await query;
+                ? client.from(type).update(values).eq('id', item.id).select().single()
+                : client.from(type).insert(values).select().single();
+            const { data: savedItem, error } = await query;
             if (error) {
                 alert(`Не удалось сохранить: ${error.message}`);
+                return;
+            }
+            const orderError = await applyOrder(type, section, savedItem, values.sort_order);
+            if (orderError) {
+                alert(`Данные сохранены, но порядок обновить не удалось: ${orderError.message}`);
+                await loadEverything();
                 return;
             }
             editor.close();
@@ -334,6 +360,9 @@
     document.getElementById('applicationSort').addEventListener('change', renderApplications);
     document.getElementById('applicationSearch').addEventListener('input', renderApplications);
     document.getElementById('syncBtn').addEventListener('click', loadEverything);
+    document.getElementById('siteBtn').addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         await client.auth.signOut();
         window.location.href = 'index.html';
