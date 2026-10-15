@@ -1,5 +1,6 @@
 window.APP_CONFIG = {
   appName: 'ProUchet',
+  siteUrl: 'https://prouchet-kokshetau.pages.dev',
   supabaseUrl: 'https://nckoyjwohewvrkorxqur.supabase.co',
   supabaseAnonKey: 'sb_publishable_Ah92dcHzGsM7lE3auXRW2Q_jeVuRGUO',
   adminPanelPath: '/admin_panel.html',

@@ -19,7 +19,23 @@
             return;
         }
 
-        document.title = `${course.title} | ProUchet`;
+        const pageTitle = `${course.title} — курс бухгалтерии в Кокшетау | ProUchet`;
+        const pageDescription = String(course.description || course.short_description || '')
+            .replace(/\s+/g, ' ').trim().slice(0, 160);
+        const siteUrl = window.APP_CONFIG.siteUrl || window.location.origin;
+        const canonicalUrl = `${siteUrl}/course.html?slug=${encodeURIComponent(course.slug)}`;
+        document.title = pageTitle;
+        document.querySelector('meta[name="description"]').content = pageDescription;
+        document.querySelector('meta[property="og:title"]').content = pageTitle;
+        document.querySelector('meta[property="og:description"]').content = pageDescription;
+        const canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        canonical.href = canonicalUrl;
+        document.head.append(canonical);
+        const openGraphUrl = document.createElement('meta');
+        openGraphUrl.setAttribute('property', 'og:url');
+        openGraphUrl.content = canonicalUrl;
+        document.head.append(openGraphUrl);
         const curriculum = Array.isArray(course.curriculum) ? course.curriculum : [];
         const qr = course.kaspi_qr_url
             ? `<img class="qr" src="${escapeHtml(course.kaspi_qr_url)}" alt="QR-код для оплаты курса">`
