@@ -15,6 +15,18 @@
         authMessage.textContent = message;
         authMessage.style.color = isError ? '#dc2626' : '#16a34a';
     };
+    const courseQrStoragePath = (publicUrl) => {
+        if (!publicUrl) return null;
+        try {
+            const url = new URL(publicUrl);
+            const projectUrl = new URL(window.APP_CONFIG.supabaseUrl);
+            const prefix = '/storage/v1/object/public/course-payment-qr/';
+            if (url.origin !== projectUrl.origin || !url.pathname.startsWith(prefix)) return null;
+            return decodeURIComponent(url.pathname.slice(prefix.length));
+        } catch {
+            return null;
+        }
+    };
 
     if (!client) {
         showMessage('Supabase не загружен. Проверьте подключение к интернету и config.js.');
@@ -235,6 +247,8 @@
             event.preventDefault();
             const data = new FormData(form);
             const published = data.has('is_published');
+            let uploadedQrPath = null;
+            const previousQrPath = isCourse ? courseQrStoragePath(item?.kaspi_qr_url) : null;
             const values = isCourse ? {
                 slug: String(data.get('slug')).trim().toLowerCase().replace(/\s+/g, '-'),
                 category: String(data.get('category')).trim(),
@@ -264,13 +278,14 @@
                         alert('QR-файл должен быть PNG, JPG или WebP и не больше 5 МБ.');
                         return;
                     }
-                    const filePath = `${crypto.randomUUID()}-${qrFile.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
-                    const { error: uploadError } = await client.storage.from('course-payment-qr').upload(filePath, qrFile, { upsert: true });
+                    uploadedQrPath = `${crypto.randomUUID()}-${qrFile.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
+                    const { error: uploadError } = await client.storage.from('course-payment-qr').upload(uploadedQrPath, qrFile, { upsert: true });
                     if (uploadError) {
+                        uploadedQrPath = null;
                         alert(`Не удалось загрузить QR: ${uploadError.message}`);
                         return;
                     }
-                    values.kaspi_qr_url = client.storage.from('course-payment-qr').getPublicUrl(filePath).data.publicUrl;
+                    values.kaspi_qr_url = client.storage.from('course-payment-qr').getPublicUrl(uploadedQrPath).data.publicUrl;
                 }
             }
             const query = item
@@ -278,8 +293,13 @@
                 : client.from(type).insert(values).select().single();
             const { data: savedItem, error } = await query;
             if (error) {
+                if (uploadedQrPath) await client.storage.from('course-payment-qr').remove([uploadedQrPath]);
                 alert(`Не удалось сохранить: ${error.message}`);
                 return;
+            }
+            if (uploadedQrPath && previousQrPath && previousQrPath !== uploadedQrPath) {
+                const { error: removeError } = await client.storage.from('course-payment-qr').remove([previousQrPath]);
+                if (removeError) console.error('Курс сохранён, но предыдущий QR не удалось удалить:', removeError);
             }
             const orderError = await applyOrder(type, section, savedItem, values.sort_order);
             if (orderError) {
