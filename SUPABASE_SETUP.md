@@ -4,6 +4,18 @@
 
 Откройте Supabase Dashboard нужного проекта, перейдите в **SQL Editor → New query**, вставьте содержимое `supabase/schema.sql` и нажмите **Run**. Скрипт создаст таблицы, политики доступа, bucket для QR и начальные карточки/курсы.
 
+Если проект уже запущен, повторно выполните актуальный `supabase/schema.sql`: он явно отзывает у `anon` и `public` все права на таблицы, затем выдаёт только необходимые права. Это важно для защиты заявок даже при оставшихся старых GRANT.
+
+Для проверки прав выполните:
+
+```sql
+select
+	has_table_privilege('anon', 'public.applications', 'select') as anon_can_read_applications,
+	has_table_privilege('anon', 'public.applications', 'insert') as anon_can_submit_applications;
+```
+
+Ожидаемый результат: `anon_can_read_applications = false`, `anon_can_submit_applications = true`.
+
 ## 2. Создать учётную запись администратора
 
 В Supabase откройте **Authentication → Users → Add user** и создайте пользователя с email и сильным паролем. Подтвердите email, если это требуется настройками проекта.

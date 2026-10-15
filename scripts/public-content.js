@@ -57,22 +57,29 @@
 
     async function renderCourses() {
         const { data, error } = await client.from('courses')
-            .select('slug,title,category,icon,short_description,price,currency,sort_order')
+            .select('slug,title,short_description,curriculum,price,currency,sort_order')
             .eq('is_published', true).order('sort_order');
         if (error || !data?.length) return;
 
         const grid = document.querySelector('.courses-grid');
         if (!grid) return;
-        grid.innerHTML = data.map((course) => `
-            <article class="glass-card course-card">
-                <span class="badge">${escapeHtml(course.category)}</span>
-                <div class="icon-box"><i class="${escapeHtml(course.icon)}" aria-hidden="true"></i></div>
-                <h3>${escapeHtml(course.title)}</h3>
-                <p>${escapeHtml(course.short_description)}</p>
-                <span class="price">${Number(course.price).toLocaleString('ru-RU')} ${escapeHtml(course.currency)}</span>
-                <a href="course.html?slug=${encodeURIComponent(course.slug)}" class="btn btn-primary full-width">Подробнее и оплата</a>
-            </article>
-        `).join('');
+        grid.innerHTML = data.map((course) => {
+            const curriculum = Array.isArray(course.curriculum) ? course.curriculum : [];
+            const price = Number(course.price).toLocaleString('ru-RU').replace(/[\s\u00a0\u202f]+/g, '.');
+            const currency = course.currency === 'KZT' ? 'тг' : escapeHtml(course.currency);
+            return `
+                <article class="glass-card course-card">
+                    ${course.slug === 'pro' ? '<span class="course-tag">Популярный</span>' : ''}
+                    <h3>${escapeHtml(course.title)}</h3>
+                    <p>${escapeHtml(course.short_description)}</p>
+                    <span class="price">${price} ${currency}</span>
+                    <ul class="course-features">
+                        ${curriculum.map((item) => `<li><i class="fa-solid fa-check" aria-hidden="true"></i><span>${escapeHtml(item)}</span></li>`).join('')}
+                    </ul>
+                    <a href="course.html?slug=${encodeURIComponent(course.slug)}" class="btn btn-primary full-width"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>&nbsp; Купить курс</a>
+                </article>
+            `;
+        }).join('');
     }
 
     Promise.all([renderBenefits(), renderFaq(), renderCourses()]).catch((error) => {

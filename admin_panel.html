@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ-панель | ProUchet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <style>
         :root {
             --bg: #f8fafc;
@@ -71,7 +72,7 @@
         .soft-btn { background: #eff6ff; color: var(--primary-dark); }
         .primary-btn { background: var(--primary); color: white; }
         .danger-btn { background: #fee2e2; color: var(--danger); }
-        .layout { margin-top: 16px; }
+        .layout { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; margin-top: 16px; align-items: start; }
         .sidebar {
             background: var(--panel);
             border: 1px solid var(--line);
@@ -94,7 +95,9 @@
             gap: 10px;
         }
         .sidebar a {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
             color: var(--text-soft);
             background: #f8fafc;
@@ -108,8 +111,11 @@
             color: var(--primary-dark);
             border-color: #dbeafe;
         }
+        .sidebar a i { width: 18px; text-align: center; }
+        .content-card .icon-box { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 10px; border-radius: 10px; background: var(--panel-soft); color: var(--primary); }
+        .content-card .icon-box i { font-size: 1.1rem; }
 
-        .content { display: flex; flex-direction: column; gap: 14px; }
+        .content { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 
         .stats-grid {
             display: grid;
@@ -253,7 +259,7 @@
             cursor: pointer;
         }
 
-        .table-wrap { overflow-x: auto; }
+        .table-wrap { min-width: 0; overflow-x: auto; }
         .applications-table {
             width: 100%;
             min-width: 760px;
@@ -284,8 +290,20 @@
         .status.done { background: #dbeafe; color: #1d4ed8; }
 
         @media (max-width: 960px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: sticky; top: 8px; z-index: 5; min-width: 0; padding: 8px; }
+            .sidebar h3 { display: none; }
+            .sidebar nav { width: 100%; min-width: 0; flex-direction: row; gap: 4px; overflow-x: auto; }
+            .sidebar a { flex: 0 0 auto; padding: 10px 12px; }
             .stats-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
             .toolbar { width: 100%; }
+        }
+        @media (max-width: 560px) {
+            .admin-shell { padding: 12px; }
+            .topbar { align-items: flex-start; padding: 14px; }
+            .topbar-actions { justify-content: flex-end; }
+            .topbar-actions button { padding: 9px 10px; }
+            .stats-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -303,13 +321,22 @@
         <header class="topbar">
             <h1>Админ-панель ProUchet</h1>
             <div class="topbar-actions">
-                <span class="badge">Supabase-ready</span>
-                <button class="soft-btn" type="button" id="syncBtn">Синхронизация</button>
-                <button class="danger-btn" type="button" id="logoutBtn">Выход</button>
+                <button class="soft-btn" type="button" id="syncBtn"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Обновить</button>
+                <button class="danger-btn" type="button" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Выход</button>
             </div>
         </header>
 
         <div class="layout">
+            <aside class="sidebar" aria-label="Навигация по админ-панели">
+                <h3>Разделы</h3>
+                <nav>
+                    <a href="#overview"><i class="fa-solid fa-gauge" aria-hidden="true"></i> Обзор</a>
+                    <a href="#section-benefits"><i class="fa-solid fa-star" aria-hidden="true"></i> Преимущества</a>
+                    <a href="#section-faq"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> FAQ</a>
+                    <a href="#section-courses"><i class="fa-solid fa-book-open" aria-hidden="true"></i> Курсы</a>
+                    <a href="#applications"><i class="fa-solid fa-inbox" aria-hidden="true"></i> Заявки</a>
+                </nav>
+            </aside>
             <main class="content">
                 <div class="stats-grid" id="overview">
                     <div class="stat-card">
@@ -375,7 +402,6 @@
                                 <th>Дата</th>
                                 <th>Просмотр</th>
                                 <th>Оплата</th>
-                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody id="applicationsBody"></tbody>

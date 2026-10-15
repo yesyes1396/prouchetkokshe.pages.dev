@@ -147,6 +147,7 @@ on public.applications for delete to authenticated
 using (public.is_admin());
 
 grant execute on function public.is_admin() to anon, authenticated;
+revoke all on table public.admin_users, public.content_cards, public.courses, public.applications from anon, public;
 grant select on public.content_cards, public.courses to anon, authenticated;
 grant insert on public.applications to anon, authenticated;
 grant select, update, delete on public.applications to authenticated;
