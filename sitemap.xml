@@ -4,12 +4,12 @@
         <loc>https://prouchet-kokshetau.pages.dev/</loc>
     </url>
     <url>
-        <loc>https://prouchet-kokshetau.pages.dev/course.html?slug=basic</loc>
+        <loc>https://prouchet-kokshetau.pages.dev/course?slug=basic</loc>
     </url>
     <url>
-        <loc>https://prouchet-kokshetau.pages.dev/course.html?slug=standard</loc>
+        <loc>https://prouchet-kokshetau.pages.dev/course?slug=standard</loc>
     </url>
     <url>
-        <loc>https://prouchet-kokshetau.pages.dev/course.html?slug=pro</loc>
+        <loc>https://prouchet-kokshetau.pages.dev/course?slug=pro</loc>
     </url>
 </urlset>
