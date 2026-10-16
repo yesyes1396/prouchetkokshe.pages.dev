@@ -357,6 +357,58 @@
         .floating-social { bottom: 20px; right: 20px; }
         .float-icon { width: 45px; height: 45px; font-size: 20px; }
     }
+
+    .admin-inline-toolbar {
+        display: none;
+        position: fixed;
+        z-index: 3000;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(760px, calc(100% - 24px));
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 14px;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 12px 34px rgba(15, 23, 42, 0.18);
+        backdrop-filter: blur(12px);
+    }
+    .admin-mode .admin-inline-toolbar { display: flex; }
+    .admin-mode { padding-top: 72px; }
+    .admin-inline-toolbar strong { color: var(--dark); font-size: 0.9rem; }
+    .admin-toolbar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .admin-toolbar-link { color: #1d4ed8; font-size: 0.84rem; font-weight: 700; text-decoration: none; }
+    .admin-inline-actions, .admin-add-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 12px;
+    }
+    .admin-inline-actions { position: relative; z-index: 2; }
+    .admin-add-actions { margin: 0 0 18px; }
+    .admin-inline-toolbar button, .admin-inline-actions button, .admin-add-actions button {
+        border: 1px solid #dbeafe;
+        border-radius: 9px;
+        padding: 7px 10px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .admin-inline-actions button[data-action="delete"] { color: #b91c1c; border-color: #fecaca; background: #fef2f2; }
+    .admin-inline-toolbar button:hover, .admin-inline-actions button:hover, .admin-add-actions button:hover { filter: brightness(0.96); }
+    .admin-inline-actions button:focus-visible, .admin-add-actions button:focus-visible, .admin-inline-toolbar button:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+    @media (max-width: 600px) {
+        .admin-inline-toolbar { align-items: stretch; flex-direction: column; }
+        .admin-toolbar-actions { justify-content: center; }
+        .admin-mode { padding-top: 118px; }
+    }
     </style>
 </head>
 <body>
@@ -366,10 +418,19 @@
             <p>Для доступа к панели управления введите логин и пароль.</p>
             <form id="adminLoginForm">
                 <input type="email" id="adminLoginInput" placeholder="Email администратора" autocomplete="username" required>
-                <input type="password" id="adminPasswordInput" placeholder="Пароль" autocomplete="current-password">
+                <input type="password" id="adminPasswordInput" placeholder="Пароль" autocomplete="current-password" required>
                 <button type="submit">Войти</button>
                 <div class="message" id="adminLoginMessage"></div>
             </form>
+        </div>
+        <div class="admin-inline-toolbar" id="adminInlineToolbar" role="region" aria-label="Управление сайтом">
+            <strong>Режим управления сайтом</strong>
+            <div class="admin-toolbar-actions">
+                <a href="admin_panel.html#applications" class="admin-toolbar-link">Заявки: <span id="adminInlineNewRequests">0</span></a>
+                <button type="button" id="syncBtn">Обновить</button>
+                <button type="button" id="siteBtn">Закрыть режим</button>
+                <button type="button" id="logoutBtn">Выйти</button>
+            </div>
         </div>
     </div>
 
@@ -736,13 +797,23 @@
                 logo.addEventListener('dblclick', async () => {
                     const client = window.supabaseClient;
                     if (client) {
-                        const { data: sessionData } = await client.auth.getSession().catch(() => ({ data: null }));
+                        const { data: sessionData, error: sessionError } = await client.auth.getSession();
+                        if (sessionError) {
+                            message.textContent = 'Не удалось проверить вход. Попробуйте ещё раз.';
+                            message.style.color = '#dc2626';
+                            modal.classList.add('active');
+                            modal.setAttribute('aria-hidden', 'false');
+                            return;
+                        }
                         const user = sessionData?.session?.user;
                         if (user) {
                             const { data: admin, error } = await client.from('admin_users')
                                 .select('user_id').eq('user_id', user.id).maybeSingle();
-                            if (!error && admin) {
-                                window.location.href = 'admin_panel.html';
+                            if (error) {
+                                message.textContent = 'Не удалось проверить права доступа.';
+                                message.style.color = '#dc2626';
+                            } else if (admin) {
+                                window.dispatchEvent(new Event('prouchet:admin-login'));
                                 return;
                             }
                         }
@@ -773,7 +844,7 @@
                         return;
                     }
 
-                    const { error } = await client.auth.signInWithPassword({
+                    const { data, error } = await client.auth.signInWithPassword({
                         email: loginInput.value.trim(),
                         password: passwordInput.value
                     });
@@ -783,9 +854,30 @@
                         return;
                     }
 
+                    const userId = data.user?.id;
+                    if (!userId) {
+                        message.textContent = 'Не удалось определить учётную запись.';
+                        message.style.color = '#dc2626';
+                        return;
+                    }
+                    const { data: admin, error: adminError } = await client.from('admin_users')
+                        .select('user_id').eq('user_id', userId).maybeSingle();
+                    if (adminError) {
+                        message.textContent = 'Не удалось проверить права доступа. Попробуйте позже.';
+                        message.style.color = '#dc2626';
+                        return;
+                    }
+                    if (!admin) {
+                        await client.auth.signOut();
+                        message.textContent = 'У этой учётной записи нет прав администратора.';
+                        message.style.color = '#dc2626';
+                        return;
+                    }
                     message.textContent = 'Успешный вход';
                     message.style.color = '#16a34a';
-                    window.location.href = 'admin_panel.html';
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    window.dispatchEvent(new Event('prouchet:admin-login'));
                 });
             }
         
@@ -864,6 +956,8 @@
     });
     </script>
     <script src="scripts/public-content.js"></script>
+    <script src="scripts/admin.js"></script>
+    <script src="scripts/home-admin.js"></script>
     <script type="module" src="scripts/fbdb.js"></script>
 </body>
 

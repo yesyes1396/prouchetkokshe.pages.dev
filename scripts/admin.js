@@ -12,6 +12,7 @@
     })[character]);
     const safeIcon = (value) => escapeHtml(value || 'fa-solid fa-circle');
     const showMessage = (message, isError = true) => {
+        if (!authMessage) return;
         authMessage.textContent = message;
         authMessage.style.color = isError ? '#dc2626' : '#16a34a';
     };
@@ -33,7 +34,7 @@
         return;
     }
 
-    authForm.addEventListener('submit', async (event) => {
+    authForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const form = new FormData(authForm);
         const { error } = await client.auth.signInWithPassword({
@@ -51,19 +52,30 @@
         showMessage('Проверяем доступ…', false);
         const { data: sessionData, error: sessionError } = await client.auth.getSession();
         const user = sessionData?.session?.user;
-        if (sessionError || !user) return;
+        if (sessionError) {
+            console.error('Не удалось проверить сессию администратора:', sessionError);
+            showMessage('Не удалось проверить вход. Обновите страницу и попробуйте снова.');
+            return;
+        }
+        if (!user) return;
 
         const { data: admin, error } = await client.from('admin_users')
             .select('user_id').eq('user_id', user.id).maybeSingle();
-        if (error || !admin) {
+        if (error) {
+            console.error('Не удалось проверить права администратора:', error);
+            showMessage('Не удалось проверить права доступа. Попробуйте обновить страницу.');
+            return;
+        }
+        if (!admin) {
             await client.auth.signOut();
             showMessage('У этой учётной записи нет прав администратора.');
             return;
         }
 
-        authGate.style.display = 'none';
-        adminShell.style.display = 'block';
-        authMessage.textContent = '';
+        if (authGate) authGate.style.display = 'none';
+        if (adminShell) adminShell.style.display = 'block';
+        if (authMessage) authMessage.textContent = '';
+        document.body.classList.add('admin-mode');
         await loadEverything();
     }
 
@@ -83,9 +95,13 @@
         state.cards = cards.data || [];
         state.courses = courses.data || [];
         state.applications = applications.data || [];
-        renderContent();
-        renderApplications();
+        if (document.getElementById('contentSections')) renderContent();
+        if (document.getElementById('applicationsBody')) renderApplications();
         updateStats();
+        window.dispatchEvent(new CustomEvent('prouchet:admin-data', {
+            detail: { cards: state.cards, courses: state.courses, applications: state.applications }
+        }));
+        window.dispatchEvent(new Event('prouchet:content-refresh'));
     }
 
     function contentSearchText(item) {
@@ -116,6 +132,7 @@
 
     function renderContent() {
         const container = document.getElementById('contentSections');
+        if (!container) return;
         const search = document.getElementById('searchInput').value.trim().toLocaleLowerCase();
         const sort = document.getElementById('sortSelect').value;
         const groups = [
@@ -156,6 +173,7 @@
     }
 
     function renderApplications() {
+        if (!document.getElementById('applicationsBody')) return;
         const statusFilter = document.getElementById('applicationFilter').value;
         const paymentFilter = document.getElementById('paymentFilter').value;
         const sort = document.getElementById('applicationSort').value;
@@ -180,14 +198,23 @@
                     <td>${escapeHtml(date)}</td>
                     <td><select class="application-status" data-application-id="${application.id}" data-column="status">${statusOptions(application.status, [['unread', 'Не прочитано'], ['viewed', 'Просмотрено'], ['archived', 'Архив']])}</select></td>
                     <td><select class="application-status" data-application-id="${application.id}" data-column="payment_status">${statusOptions(application.payment_status, [['pending', 'Ожидает оплаты'], ['paid', 'Оплачено'], ['rejected', 'Отклонено']])}</select></td>
+                    <td class="application-actions">
+                        ${application.status !== 'archived' ? `<button class="mini-btn" type="button" data-application-action="archive" data-application-id="${application.id}">В архив</button>` : ''}
+                        ${application.payment_status !== 'paid' ? `<button class="mini-btn primary" type="button" data-application-action="paid" data-application-id="${application.id}">Оплачено</button>` : ''}
+                    </td>
                 </tr>`;
-        }).join('') || '<tr><td colspan="6">Заявок по выбранным условиям нет.</td></tr>';
+        }).join('') || '<tr><td colspan="7">Заявок по выбранным условиям нет.</td></tr>';
     }
 
     function updateStats() {
-        document.getElementById('totalSections').textContent = '3';
-        document.getElementById('totalCards').textContent = String(state.cards.length + state.courses.length);
-        document.getElementById('newRequests').textContent = String(state.applications.filter((item) => item.status === 'unread').length);
+        const totalSections = document.getElementById('totalSections');
+        const totalCards = document.getElementById('totalCards');
+        const newRequests = document.getElementById('newRequests');
+        if (totalSections) totalSections.textContent = '3';
+        if (totalCards) totalCards.textContent = String(state.cards.length + state.courses.length);
+        if (newRequests) newRequests.textContent = String(state.applications.filter((item) => item.status === 'unread').length);
+        const inlineCount = document.getElementById('adminInlineNewRequests');
+        if (inlineCount) inlineCount.textContent = String(state.applications.filter((item) => item.status === 'unread').length);
     }
 
     function editorField(label, name, value, options = {}) {
@@ -362,6 +389,15 @@
     document.body.addEventListener('click', async (event) => {
         const actionButton = event.target.closest('[data-action]');
         if (actionButton) await handleContentAction(actionButton);
+        const applicationAction = event.target.closest('[data-application-action]');
+        if (applicationAction) {
+            if (applicationAction.dataset.applicationAction === 'archive') {
+                await updateApplication(applicationAction.dataset.applicationId, 'status', 'archived');
+            } else if (applicationAction.dataset.applicationAction === 'paid') {
+                await updateApplication(applicationAction.dataset.applicationId, 'payment_status', 'paid');
+            }
+            return;
+        }
         const phoneLink = event.target.closest('[data-view-application]');
         if (phoneLink) {
             const application = state.applications.find((item) => item.id === phoneLink.dataset.viewApplication);
@@ -373,20 +409,26 @@
         if (select) updateApplication(select.dataset.applicationId, select.dataset.column, select.value);
     });
 
-    document.getElementById('searchInput').addEventListener('input', renderContent);
-    document.getElementById('sortSelect').addEventListener('change', renderContent);
-    document.getElementById('applicationFilter').addEventListener('change', renderApplications);
-    document.getElementById('paymentFilter').addEventListener('change', renderApplications);
-    document.getElementById('applicationSort').addEventListener('change', renderApplications);
-    document.getElementById('applicationSearch').addEventListener('input', renderApplications);
-    document.getElementById('syncBtn').addEventListener('click', loadEverything);
-    document.getElementById('siteBtn').addEventListener('click', () => {
-        window.location.href = 'index.html';
+    document.getElementById('searchInput')?.addEventListener('input', renderContent);
+    document.getElementById('sortSelect')?.addEventListener('change', renderContent);
+    document.getElementById('applicationFilter')?.addEventListener('change', renderApplications);
+    document.getElementById('paymentFilter')?.addEventListener('change', renderApplications);
+    document.getElementById('applicationSort')?.addEventListener('change', renderApplications);
+    document.getElementById('applicationSearch')?.addEventListener('input', renderApplications);
+    document.getElementById('syncBtn')?.addEventListener('click', loadEverything);
+    document.getElementById('siteBtn')?.addEventListener('click', () => {
+        if (adminShell) {
+            window.location.href = 'index.html';
+            return;
+        }
+        document.body.classList.remove('admin-mode');
+        document.querySelectorAll('.admin-inline-actions, .admin-add-actions').forEach((node) => node.remove());
     });
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         await client.auth.signOut();
         window.location.href = 'index.html';
     });
 
+    window.addEventListener('prouchet:admin-login', startAdmin);
     startAdmin();
 })();

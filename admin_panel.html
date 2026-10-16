@@ -263,7 +263,7 @@
         .table-wrap { min-width: 0; overflow-x: auto; }
         .applications-table {
             width: 100%;
-            min-width: 760px;
+            min-width: 900px;
             border-collapse: collapse;
             margin-top: 8px;
         }
@@ -279,6 +279,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
         }
+        .application-actions { display: flex; gap: 6px; flex-wrap: wrap; }
         .status {
             display: inline-block;
             padding: 6px 10px;
@@ -376,8 +377,8 @@
                         <h2>Заявки</h2>
                         <div class="toolbar">
                             <select id="applicationFilter">
+                                <option value="unread" selected>Не прочитано</option>
                                 <option value="all">Все статусы</option>
-                                <option value="unread">Не прочитано</option>
                                 <option value="viewed">Просмотрено</option>
                                 <option value="archived">Архив</option>
                             </select>
@@ -404,6 +405,7 @@
                                 <th>Дата</th>
                                 <th>Просмотр</th>
                                 <th>Оплата</th>
+                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody id="applicationsBody"></tbody>
