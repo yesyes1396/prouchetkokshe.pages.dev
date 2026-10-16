@@ -306,9 +306,19 @@
     .footer-contact-item i { color: var(--primary); margin-top: 4px; }
     .footer-bottom { border-top: 1px solid #f1f5f9; padding-top: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
     .copyright { color: var(--text-light); font-size: 0.9rem; }
-    .footer-legal { display: flex; gap: 25px; }
+    .footer-legal { display: flex; align-items: center; gap: 25px; }
     .footer-legal a { text-decoration: none; color: var(--text-light); font-size: 1.25rem; transition: 0.3s; }
     .footer-legal a:hover { color: var(--primary); }
+    .footer-admin-login {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: var(--text-light);
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+    .footer-admin-login:hover { color: var(--primary); }
     /* Адаптивность футера */
     @media (max-width: 992px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 576px) { footer { padding: 60px 0 30px; } .footer-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } .footer-brand p { max-width: 100%; } .footer-contact-item { justify-content: center; } .footer-bottom { flex-direction: column; text-align: center; } }
@@ -423,14 +433,14 @@
                 <div class="message" id="adminLoginMessage"></div>
             </form>
         </div>
-        <div class="admin-inline-toolbar" id="adminInlineToolbar" role="region" aria-label="Управление сайтом">
-            <strong>Режим управления сайтом</strong>
-            <div class="admin-toolbar-actions">
-                <a href="admin_panel.html#applications" class="admin-toolbar-link">Заявки: <span id="adminInlineNewRequests">0</span></a>
-                <button type="button" id="syncBtn">Обновить</button>
-                <button type="button" id="siteBtn">Закрыть режим</button>
-                <button type="button" id="logoutBtn">Выйти</button>
-            </div>
+    </div>
+    <div class="admin-inline-toolbar" id="adminInlineToolbar" role="region" aria-label="Управление сайтом">
+        <strong>Режим управления сайтом</strong>
+        <div class="admin-toolbar-actions">
+            <a href="admin_panel.html#applications" class="admin-toolbar-link">Заявки: <span id="adminInlineNewRequests">0</span></a>
+            <button type="button" id="syncBtn">Обновить</button>
+            <button type="button" id="siteBtn">Закрыть режим</button>
+            <button type="button" id="logoutBtn">Выйти</button>
         </div>
     </div>
 
@@ -766,6 +776,7 @@
                     <a href="https://t.me/buh_kursy_1C" target="_blank" rel="noopener noreferrer" aria-label="Telegram-канал"><i class="fab fa-telegram"></i></a>
                     <a href="https://wa.me/+77775159566" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     <a href="https://instagram.com/rakhimova_buh?mdxt=NDJ4N2pqc3poMGli" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <button class="footer-admin-login" id="adminLoginButton" type="button">Вход администратора</button>
                 </div>
             </div>
         </div>
@@ -787,11 +798,20 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const logo = document.querySelector('.logo-wrapper');
+            const adminLoginButton = document.getElementById('adminLoginButton');
             const modal = document.getElementById('adminLoginModal');
             const form = document.getElementById('adminLoginForm');
             const loginInput = document.getElementById('adminLoginInput');
             const passwordInput = document.getElementById('adminPasswordInput');
             const message = document.getElementById('adminLoginMessage');
+            const openLoginModal = () => {
+                modal.classList.add('active');
+                modal.setAttribute('aria-hidden', 'false');
+                message.textContent = '';
+                loginInput.focus();
+            };
+
+            adminLoginButton?.addEventListener('click', openLoginModal);
 
             if (logo) {
                 logo.addEventListener('dblclick', async () => {
@@ -818,9 +838,7 @@
                             }
                         }
                     }
-                    modal.classList.add('active');
-                    modal.setAttribute('aria-hidden', 'false');
-                    loginInput.focus();
+                    openLoginModal();
                 });
             }
 
