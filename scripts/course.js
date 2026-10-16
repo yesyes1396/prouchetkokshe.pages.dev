@@ -23,7 +23,7 @@
         const pageDescription = String(course.description || course.short_description || '')
             .replace(/\s+/g, ' ').trim().slice(0, 160);
         const siteUrl = window.APP_CONFIG.siteUrl || window.location.origin;
-        const canonicalUrl = `${siteUrl}/course.html?slug=${encodeURIComponent(course.slug)}`;
+        const canonicalUrl = `${siteUrl}/course?slug=${encodeURIComponent(course.slug)}`;
         document.title = pageTitle;
         document.querySelector('meta[name="description"]').content = pageDescription;
         document.querySelector('meta[property="og:title"]').content = pageTitle;

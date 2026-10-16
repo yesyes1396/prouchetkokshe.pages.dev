@@ -176,7 +176,7 @@ with check (bucket_id = 'course-payment-qr' and public.is_admin());
 
 drop policy if exists "admins can delete course payment QR" on storage.objects;
 create policy "admins can delete course payment QR"
-on storage.objects for delete to authenticated
+on storage.objects for delete to authenticated  
 using (bucket_id = 'course-payment-qr' and public.is_admin());
 
 insert into public.content_cards (section, icon, title, body, sort_order)
