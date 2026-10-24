@@ -5,6 +5,80 @@
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     })[character]);
+    const defaultFooter = {
+        brand: 'ProUchet',
+        description: 'Профессиональное обучение бухгалтерии в Казахстане. От азов до уровня главного бухгалтера за 2 месяца.',
+        navigation_title: 'Навигация',
+        navigation_links: [{ label: 'Главная', href: '#home' }, { label: 'Преимущества', href: '#features' }, { label: 'Курсы', href: '#courses' }, { label: 'Вопросы и ответы', href: '#faq' }],
+        support_title: 'Поддержка',
+        support_links: [{ label: 'Конфиденциальность', href: 'privacy-policy.html' }, { label: 'Задать вопрос', href: '#contact' }, { label: 'Наш канал', href: 'https://t.me/buh_kursy_1C' }],
+        contacts_title: 'Контакты',
+        address: 'г. Кокшетау, Улица Рахымжана Кошкарбаева, 58',
+        phone: '+7 777 515 95 66',
+        email: 'prouchet2@gmail.com',
+        copyright: '© 2026 ProUchet. Все права защищены.',
+        telegram_url: 'https://t.me/buh_kursy_1C',
+        whatsapp_url: 'https://wa.me/+77775159566',
+        instagram_url: 'https://instagram.com/rakhimova_buh?mdxt=NDJ4N2pqc3poMGli'
+    };
+
+    function safeHref(value) {
+        const href = String(value || '').trim();
+        if (/^(#|\/|\.\/|\.\.\/)/.test(href)) return href;
+        try {
+            const url = new URL(href, window.location.href);
+            return ['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol) ? href : '#';
+        } catch {
+            return '#';
+        }
+    }
+
+    function renderFooter(settings) {
+        const footer = document.querySelector('footer');
+        if (!footer) return;
+        const values = { ...defaultFooter, ...(settings || {}) };
+        const setText = (selector, value) => {
+            const element = footer.querySelector(selector);
+            if (element) element.textContent = value || '';
+        };
+        setText('.footer-brand .logo-text', values.brand);
+        setText('.footer-brand p', values.description);
+        setText('.footer-bottom .copyright', values.copyright);
+        const titles = footer.querySelectorAll('.footer-title');
+        if (titles[0]) titles[0].textContent = values.navigation_title;
+        if (titles[1]) titles[1].textContent = values.support_title;
+        if (titles[2]) titles[2].textContent = values.contacts_title;
+        const linkLists = footer.querySelectorAll('.footer-links');
+        [values.navigation_links, values.support_links].forEach((links, index) => {
+            const list = linkLists[index];
+            if (!list) return;
+            list.replaceChildren(...(Array.isArray(links) ? links : []).map((link) => {
+                const item = document.createElement('li');
+                const anchor = document.createElement('a');
+                anchor.textContent = link.label || '';
+                anchor.href = safeHref(link.href);
+                item.append(anchor);
+                return item;
+            }));
+        });
+        const contacts = footer.querySelectorAll('.footer-contact-item span');
+        [values.address, values.phone, values.email].forEach((value, index) => {
+            if (contacts[index]) contacts[index].textContent = value || '';
+        });
+        const socialLinks = footer.querySelectorAll('.footer-legal a');
+        [values.telegram_url, values.whatsapp_url, values.instagram_url].forEach((value, index) => {
+            if (socialLinks[index]) socialLinks[index].href = safeHref(value);
+        });
+    }
+
+    async function loadFooter() {
+        const { data, error } = await client.from('site_settings').select('value').eq('key', 'footer').maybeSingle();
+        if (error) {
+            console.error('Не удалось загрузить настройки футера:', error);
+            return;
+        }
+        renderFooter(data?.value);
+    }
 
     async function renderBenefits() {
         const { data, error } = await client.from('content_cards')
@@ -102,7 +176,7 @@
     }
 
     function refreshContent() {
-        return Promise.all([renderBenefits(), renderFaq(), renderCourses()]).then(() => {
+        return Promise.all([renderBenefits(), renderFaq(), renderCourses(), loadFooter()]).then(() => {
             window.dispatchEvent(new Event('prouchet:content-rendered'));
         }).catch((error) => {
             console.error('Не удалось загрузить опубликованный контент Supabase:', error);
@@ -110,5 +184,6 @@
     }
 
     window.addEventListener('prouchet:content-refresh', refreshContent);
+    window.addEventListener('prouchet:footer-updated', (event) => renderFooter(event.detail));
     refreshContent();
 })();

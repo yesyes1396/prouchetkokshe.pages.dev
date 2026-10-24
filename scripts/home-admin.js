@@ -46,6 +46,13 @@
         addSectionButton(document.querySelector('.features-grid'), 'content_cards', 'benefits', 'преимущество');
         addSectionButton(document.querySelector('.faq-container'), 'content_cards', 'faq', 'вопрос');
         addSectionButton(document.querySelector('.courses-grid'), 'courses', '', 'курс');
+        const footer = document.querySelector('footer');
+        if (footer && !footer.querySelector('.admin-footer-actions')) {
+            const actions = document.createElement('div');
+            actions.className = 'admin-add-actions admin-footer-actions';
+            actions.append(button('Изменить футер', 'edit-footer', '', ''));
+            footer.prepend(actions);
+        }
     }
 
     window.addEventListener('prouchet:admin-data', renderControls);

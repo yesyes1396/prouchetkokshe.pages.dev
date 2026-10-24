@@ -53,6 +53,12 @@ create table if not exists public.courses (
     updated_at timestamptz not null default now()
 );
 
+create table if not exists public.site_settings (
+    key text primary key,
+    value jsonb not null default '{}'::jsonb,
+    updated_at timestamptz not null default now()
+);
+
 create table if not exists public.applications (
     id uuid primary key default gen_random_uuid(),
     full_name text not null check (char_length(trim(full_name)) between 2 and 160),
@@ -99,6 +105,7 @@ for each row execute function public.set_updated_at();
 alter table public.admin_users enable row level security;
 alter table public.content_cards enable row level security;
 alter table public.courses enable row level security;
+alter table public.site_settings enable row level security;
 alter table public.applications enable row level security;
 
 drop policy if exists "admins can manage admin users" on public.admin_users;
@@ -126,6 +133,16 @@ create policy "admins can manage courses"
 on public.courses for all to authenticated
 using (public.is_admin()) with check (public.is_admin());
 
+drop policy if exists "public can read site settings" on public.site_settings;
+create policy "public can read site settings"
+on public.site_settings for select to anon, authenticated
+using (true);
+
+drop policy if exists "admins can manage site settings" on public.site_settings;
+create policy "admins can manage site settings"
+on public.site_settings for all to authenticated
+using (public.is_admin()) with check (public.is_admin());
+
 drop policy if exists "public can create applications" on public.applications;
 create policy "public can create applications"
 on public.applications for insert to anon, authenticated
@@ -147,11 +164,11 @@ on public.applications for delete to authenticated
 using (public.is_admin());
 
 grant execute on function public.is_admin() to anon, authenticated;
-revoke all on table public.admin_users, public.content_cards, public.courses, public.applications from anon, public;
-grant select on public.content_cards, public.courses to anon, authenticated;
+revoke all on table public.admin_users, public.content_cards, public.courses, public.site_settings, public.applications from anon, public;
+grant select on public.content_cards, public.courses, public.site_settings to anon, authenticated;
 grant insert on public.applications to anon, authenticated;
 grant select, update, delete on public.applications to authenticated;
-grant select, insert, update, delete on public.content_cards, public.courses to authenticated;
+grant select, insert, update, delete on public.content_cards, public.courses, public.site_settings to authenticated;
 grant select, insert, update, delete on public.admin_users to authenticated;
 
 insert into storage.buckets (id, name, public)

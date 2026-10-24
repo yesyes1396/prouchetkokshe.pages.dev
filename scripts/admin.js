@@ -4,7 +4,23 @@
     const adminShell = document.querySelector('.admin-shell');
     const authForm = document.getElementById('adminAuthForm');
     const authMessage = document.getElementById('authMessage');
-    const state = { cards: [], courses: [], applications: [] };
+    const defaultFooter = {
+        brand: 'ProUchet',
+        description: 'Профессиональное обучение бухгалтерии в Казахстане. От азов до уровня главного бухгалтера за 2 месяца.',
+        navigation_title: 'Навигация',
+        navigation_links: [{ label: 'Главная', href: '#home' }, { label: 'Преимущества', href: '#features' }, { label: 'Курсы', href: '#courses' }, { label: 'Вопросы и ответы', href: '#faq' }],
+        support_title: 'Поддержка',
+        support_links: [{ label: 'Конфиденциальность', href: 'privacy-policy.html' }, { label: 'Задать вопрос', href: '#contact' }, { label: 'Наш канал', href: 'https://t.me/buh_kursy_1C' }],
+        contacts_title: 'Контакты',
+        address: 'г. Кокшетау, Улица Рахымжана Кошкарбаева, 58',
+        phone: '+7 777 515 95 66',
+        email: 'prouchet2@gmail.com',
+        copyright: '© 2026 ProUchet. Все права защищены.',
+        telegram_url: 'https://t.me/buh_kursy_1C',
+        whatsapp_url: 'https://wa.me/+77775159566',
+        instagram_url: 'https://instagram.com/rakhimova_buh?mdxt=NDJ4N2pqc3poMGli'
+    };
+    const state = { cards: [], courses: [], applications: [], footer: defaultFooter };
     const sectionNames = { benefits: 'Преимущества', faq: 'FAQ' };
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -83,9 +99,10 @@
         const results = await Promise.all([
             client.from('content_cards').select('*').order('sort_order'),
             client.from('courses').select('*').order('sort_order'),
-            client.from('applications').select('*').order('created_at', { ascending: false })
+            client.from('applications').select('*').order('created_at', { ascending: false }),
+            client.from('site_settings').select('value').eq('key', 'footer').maybeSingle()
         ]);
-        const [cards, courses, applications] = results;
+        const [cards, courses, applications, footer] = results;
         const failed = results.find((result) => result.error);
         if (failed) {
             console.error('Ошибка загрузки данных:', failed.error);
@@ -95,6 +112,7 @@
         state.cards = cards.data || [];
         state.courses = courses.data || [];
         state.applications = applications.data || [];
+        state.footer = { ...defaultFooter, ...(footer.data?.value || {}) };
         if (document.getElementById('contentSections')) renderContent();
         if (document.getElementById('applicationsBody')) renderApplications();
         updateStats();
@@ -159,7 +177,14 @@
                         ${items.map((item) => renderCard(item, group.type)).join('')}
                     </div>
                 </section>`;
-        }).join('');
+        }).join('') + `
+            <section class="section-box" id="section-footer">
+                <div class="section-box-header">
+                    <h3>Футер сайта</h3>
+                    <button class="primary-btn" type="button" data-action="edit-footer">Изменить футер</button>
+                </div>
+                <p>Бренд, описание, ссылки, контакты и социальные сети.</p>
+            </section>`;
     }
 
     function statusOptions(value, options) {
@@ -210,7 +235,7 @@
         const totalSections = document.getElementById('totalSections');
         const totalCards = document.getElementById('totalCards');
         const newRequests = document.getElementById('newRequests');
-        if (totalSections) totalSections.textContent = '3';
+        if (totalSections) totalSections.textContent = '4';
         if (totalCards) totalCards.textContent = String(state.cards.length + state.courses.length);
         if (newRequests) newRequests.textContent = String(state.applications.filter((item) => item.status === 'unread').length);
         const inlineCount = document.getElementById('adminInlineNewRequests');
@@ -340,8 +365,85 @@
         editor.showModal();
     }
 
+    function linkLines(links) {
+        return (Array.isArray(links) ? links : []).map((link) => `${link.label || ''} | ${link.href || ''}`).join('\n');
+    }
+
+    function parseLinkLines(value) {
+        return String(value || '').split('\n').map((line) => {
+            const separator = line.indexOf('|');
+            if (separator < 0) return null;
+            const label = line.slice(0, separator).trim();
+            const href = line.slice(separator + 1).trim();
+            return label && href ? { label, href } : null;
+        }).filter(Boolean);
+    }
+
+    async function editFooter() {
+        const footer = state.footer;
+        const fields = [
+            editorField('Название бренда', 'brand', footer.brand, { required: true }),
+            editorField('Описание', 'description', footer.description, { type: 'textarea', rows: 3 }),
+            editorField('Заголовок навигации', 'navigation_title', footer.navigation_title),
+            editorField('Ссылки навигации (название | адрес, по одной на строку)', 'navigation_links', linkLines(footer.navigation_links), { type: 'textarea', rows: 4 }),
+            editorField('Заголовок поддержки', 'support_title', footer.support_title),
+            editorField('Ссылки поддержки (название | адрес, по одной на строку)', 'support_links', linkLines(footer.support_links), { type: 'textarea', rows: 4 }),
+            editorField('Заголовок контактов', 'contacts_title', footer.contacts_title),
+            editorField('Адрес', 'address', footer.address),
+            editorField('Телефон', 'phone', footer.phone),
+            editorField('Электронная почта', 'email', footer.email),
+            editorField('Текст копирайта', 'copyright', footer.copyright),
+            editorField('Ссылка Telegram', 'telegram_url', footer.telegram_url),
+            editorField('Ссылка WhatsApp', 'whatsapp_url', footer.whatsapp_url),
+            editorField('Ссылка Instagram', 'instagram_url', footer.instagram_url)
+        ];
+        const editor = document.createElement('dialog');
+        editor.style.cssText = 'border:0;border-radius:14px;width:min(680px,calc(100% - 24px));max-height:90vh;padding:24px;box-shadow:0 20px 60px #0f172a40';
+        editor.innerHTML = `
+            <form method="dialog" class="editor-form">
+                <style>.editor-form{display:grid;gap:12px}.editor-form h2{margin:0 0 6px}.editor-form label{display:grid;gap:6px;font-weight:600}.editor-form input:not([type=checkbox]),.editor-form textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.editor-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}</style>
+                <h2>Редактировать футер</h2>
+                ${fields.join('')}
+                <div class="editor-actions"><button type="button" class="soft-btn" data-close>Отмена</button><button type="submit" class="primary-btn">Сохранить</button></div>
+            </form>`;
+        document.body.append(editor);
+        const form = editor.querySelector('form');
+        editor.querySelector('[data-close]').addEventListener('click', () => editor.close());
+        editor.addEventListener('close', () => editor.remove());
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const data = new FormData(form);
+            const values = {
+                brand: String(data.get('brand')).trim(),
+                description: String(data.get('description')).trim(),
+                navigation_title: String(data.get('navigation_title')).trim(),
+                navigation_links: parseLinkLines(data.get('navigation_links')),
+                support_title: String(data.get('support_title')).trim(),
+                support_links: parseLinkLines(data.get('support_links')),
+                contacts_title: String(data.get('contacts_title')).trim(),
+                address: String(data.get('address')).trim(),
+                phone: String(data.get('phone')).trim(),
+                email: String(data.get('email')).trim(),
+                copyright: String(data.get('copyright')).trim(),
+                telegram_url: String(data.get('telegram_url')).trim(),
+                whatsapp_url: String(data.get('whatsapp_url')).trim(),
+                instagram_url: String(data.get('instagram_url')).trim()
+            };
+            const { error } = await client.from('site_settings').upsert({ key: 'footer', value: values });
+            if (error) {
+                alert(`Не удалось сохранить футер: ${error.message}`);
+                return;
+            }
+            state.footer = values;
+            editor.close();
+            window.dispatchEvent(new CustomEvent('prouchet:footer-updated', { detail: values }));
+        });
+        editor.showModal();
+    }
+
     async function handleContentAction(button) {
         const { action, type, section, id, direction } = button.dataset;
+        if (action === 'edit-footer') return editFooter();
         const list = type === 'courses' ? state.courses : state.cards.filter((card) => card.section === section);
         const item = list.find((record) => String(record.id) === String(id));
         if (action === 'add') return editItem(type, null, section);
