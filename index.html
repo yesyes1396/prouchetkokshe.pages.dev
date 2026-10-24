@@ -304,6 +304,13 @@
     .footer-links a:hover { color: var(--primary); padding-left: 5px; }
     .footer-contact-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; color: var(--text-light); font-size: 0.95rem; }
     .footer-contact-item i { color: var(--primary); margin-top: 4px; }
+    .footer-location { margin: 0 0 40px; }
+    .footer-location-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+    .footer-location-title { margin: 0; color: var(--dark); font-size: 1rem; }
+    .footer-location-address { display: flex; align-items: center; gap: 8px; color: var(--text-light); font-size: 0.9rem; text-decoration: none; }
+    .footer-location-address i { color: var(--primary); }
+    .footer-location-address:hover { color: var(--primary); }
+    .footer-location-map { display: block; width: 100%; height: 280px; border: 0; border-radius: 10px; background: #edf2f4; }
     .footer-bottom { border-top: 1px solid #f1f5f9; padding-top: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
     .copyright { color: var(--text-light); font-size: 0.9rem; }
     .footer-legal { display: flex; align-items: center; gap: 25px; }
@@ -321,7 +328,7 @@
     .footer-admin-login:hover { color: var(--primary); }
     /* Адаптивность футера */
     @media (max-width: 992px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 576px) { footer { padding: 60px 0 30px; } .footer-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } .footer-brand p { max-width: 100%; } .footer-contact-item { justify-content: center; } .footer-bottom { flex-direction: column; text-align: center; } }
+    @media (max-width: 576px) { footer { padding: 60px 0 30px; } .footer-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; } .footer-brand p { max-width: 100%; } .footer-contact-item { justify-content: center; } .footer-location { margin-bottom: 30px; } .footer-location-head { align-items: flex-start; flex-direction: column; } .footer-location-map { height: 230px; } .footer-bottom { flex-direction: column; text-align: center; } }
 
     /* --- Animations --- */
     .reveal { opacity: 0; transform: translateY(40px); transition: 1s all ease; }
@@ -768,6 +775,17 @@
                     </div>
                 </div>
             </div>
+
+            <section class="footer-location" aria-labelledby="footerLocationTitle">
+                <div class="footer-location-head">
+                    <h3 class="footer-location-title" id="footerLocationTitle">Мы на карте</h3>
+                    <a class="footer-location-address" href="https://www.google.com/maps/search/?api=1&amp;query=%D0%9A%D0%BE%D0%BA%D1%88%D0%B5%D1%82%D0%B0%D1%83%2C%20%D0%A3%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A0%D0%B0%D1%85%D1%8B%D0%BC%D0%B6%D0%B0%D0%BD%D0%B0%20%D0%9A%D0%BE%D1%88%D0%BA%D0%B0%D1%80%D0%B1%D0%B0%D0%B5%D0%B2%D0%B0%2C%2058" target="_blank" rel="noopener noreferrer">
+                        <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                        <span class="footer-location-address-text">г. Кокшетау, Улица Рахымжана Кошкарбаева, 58</span>
+                    </a>
+                </div>
+                <iframe class="footer-location-map" title="Карта: г. Кокшетау, Улица Рахымжана Кошкарбаева, 58" src="https://maps.google.com/maps?q=%D0%9A%D0%BE%D0%BA%D1%88%D0%B5%D1%82%D0%B0%D1%83%2C%20%D0%A3%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A0%D0%B0%D1%85%D1%8B%D0%BC%D0%B6%D0%B0%D0%BD%D0%B0%20%D0%9A%D0%BE%D1%88%D0%BA%D0%B0%D1%80%D0%B1%D0%B0%D0%B5%D0%B2%D0%B0%2C%2058&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+            </section>
 
             <!-- Нижняя панель -->
             <div class="footer-bottom">

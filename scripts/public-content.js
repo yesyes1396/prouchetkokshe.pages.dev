@@ -65,6 +65,24 @@
         [values.address, values.phone, values.email].forEach((value, index) => {
             if (contacts[index]) contacts[index].textContent = value || '';
         });
+        const mapAddress = values.address || defaultFooter.address;
+        const locationAddress = footer.querySelector('.footer-location-address-text');
+        if (locationAddress) locationAddress.textContent = mapAddress;
+        const locationLink = footer.querySelector('.footer-location-address');
+        if (locationLink) {
+            const mapUrl = new URL('https://www.google.com/maps/search/');
+            mapUrl.searchParams.set('api', '1');
+            mapUrl.searchParams.set('query', mapAddress);
+            locationLink.href = mapUrl.toString();
+        }
+        const mapFrame = footer.querySelector('.footer-location-map');
+        if (mapFrame) {
+            const mapUrl = new URL('https://maps.google.com/maps');
+            mapUrl.searchParams.set('q', mapAddress);
+            mapUrl.searchParams.set('output', 'embed');
+            mapFrame.src = mapUrl.toString();
+            mapFrame.title = `Карта: ${mapAddress}`;
+        }
         const socialLinks = footer.querySelectorAll('.footer-legal a');
         [values.telegram_url, values.whatsapp_url, values.instagram_url].forEach((value, index) => {
             if (socialLinks[index]) socialLinks[index].href = safeHref(value);
