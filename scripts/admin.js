@@ -99,20 +99,31 @@
         const results = await Promise.all([
             client.from('content_cards').select('*').order('sort_order'),
             client.from('courses').select('*').order('sort_order'),
-            client.from('applications').select('*').order('created_at', { ascending: false }),
-            client.from('site_settings').select('value').eq('key', 'footer').maybeSingle()
+            client.from('applications').select('*').order('created_at', { ascending: false })
         ]);
-        const [cards, courses, applications, footer] = results;
-        const failed = results.find((result) => result.error);
+        const [cards, courses, applications] = results;
+        const failed = [
+            ['карточек', cards],
+            ['курсов', courses],
+            ['заявок', applications]
+        ].find(([, result]) => result.error);
         if (failed) {
-            console.error('Ошибка загрузки данных:', failed.error);
-            alert('Не удалось загрузить данные. Проверьте, что supabase/schema.sql выполнен и учётка добавлена в admin_users.');
+            const [resource, result] = failed;
+            console.error(`Ошибка загрузки ${resource}:`, result.error);
+            alert(`Не удалось загрузить ${resource}: ${result.error.message} (код ${result.error.code || 'не указан'}). Проверьте схему Supabase и права администратора.`);
             return;
         }
         state.cards = cards.data || [];
         state.courses = courses.data || [];
         state.applications = applications.data || [];
-        state.footer = { ...defaultFooter, ...(footer.data?.value || {}) };
+        const footer = await client.from('site_settings').select('value').eq('key', 'footer').maybeSingle();
+        if (footer.error) {
+            console.error('Ошибка загрузки настроек футера:', footer.error);
+            state.footer = defaultFooter;
+            alert(`Основная админка загружена, но настройки футера недоступны: ${footer.error.message} (код ${footer.error.code || 'не указан'}).`);
+        } else {
+            state.footer = { ...defaultFooter, ...(footer.data?.value || {}) };
+        }
         if (document.getElementById('contentSections')) renderContent();
         if (document.getElementById('applicationsBody')) renderApplications();
         updateStats();
