@@ -23,7 +23,8 @@
     const state = {
         cards: [], courses: [], applications: [], footer: defaultFooter,
         unreadApplicationsCount: 0, applicationTotalCount: 0, applicationPage: 1,
-        applicationPageSize: 25, selectedApplicationIds: new Set()
+        applicationPageSize: 25, selectedApplicationIds: new Set(),
+        applicationRequestId: 0, applicationSavingIds: new Set(), applicationBulkSaving: false
     };
     const sectionNames = { benefits: 'Преимущества', faq: 'FAQ' };
 
@@ -205,6 +206,7 @@
     }
 
     async function loadApplications() {
+        const requestId = ++state.applicationRequestId;
         const statusFilter = document.getElementById('applicationFilter').value;
         const paymentFilter = document.getElementById('paymentFilter').value;
         const sort = document.getElementById('applicationSort').value;
@@ -223,14 +225,29 @@
         if (paymentFilter !== 'all') applicationsQuery = applicationsQuery.eq('payment_status', paymentFilter);
         if (search) applicationsQuery = applicationsQuery.or(`full_name.ilike.%${search}%,phone.ilike.%${search}%`);
 
-        const [applications, unread] = await Promise.all([
-            applicationsQuery,
-            client.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'unread')
-        ]);
+        const table = document.getElementById('applicationsTable');
+        table.setAttribute('aria-busy', 'true');
+        document.getElementById('applicationsBody').innerHTML = '<tr><td class="application-empty" colspan="8"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Загружаем заявки…</td></tr>';
+        let applications;
+        let unread;
+        try {
+            [applications, unread] = await Promise.all([
+                applicationsQuery,
+                client.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'unread')
+            ]);
+        } catch (error) {
+            if (requestId !== state.applicationRequestId) return;
+            console.error('Ошибка загрузки заявок:', error);
+            table.removeAttribute('aria-busy');
+            document.getElementById('applicationsBody').innerHTML = '<tr><td class="application-empty" colspan="8">Не удалось загрузить заявки. Проверьте соединение и нажмите «Обновить данные».</td></tr>';
+            return;
+        }
+        if (requestId !== state.applicationRequestId) return;
         const failed = [applications, unread].find((result) => result.error);
         if (failed) {
             console.error('Ошибка загрузки заявок:', failed.error);
-            alert(`Не удалось загрузить заявки: ${failed.error.message}`);
+            table.removeAttribute('aria-busy');
+            document.getElementById('applicationsBody').innerHTML = '<tr><td class="application-empty" colspan="8">Не удалось загрузить заявки. Проверьте соединение и нажмите «Обновить данные».</td></tr>';
             return;
         }
         state.applicationTotalCount = applications.count || 0;
@@ -241,6 +258,7 @@
             return loadApplications();
         }
         state.applications = applications.data || [];
+        table.removeAttribute('aria-busy');
         renderApplications();
         updateStats();
     }
@@ -261,26 +279,36 @@
         document.getElementById('nextApplicationPage').disabled = end >= state.applicationTotalCount;
         const pageIds = rows.map((application) => String(application.id));
         const selectAll = document.getElementById('selectAllApplications');
-        selectAll.checked = pageIds.length > 0 && pageIds.every((id) => state.selectedApplicationIds.has(id));
+        const selectedOnPage = pageIds.filter((id) => state.selectedApplicationIds.has(id)).length;
+        selectAll.checked = pageIds.length > 0 && selectedOnPage === pageIds.length;
+        selectAll.indeterminate = selectedOnPage > 0 && selectedOnPage < pageIds.length;
         selectAll.disabled = pageIds.length === 0;
         document.getElementById('applicationBulkActions').hidden = state.selectedApplicationIds.size === 0;
         document.getElementById('selectedApplicationCount').textContent = String(state.selectedApplicationIds.size);
         document.getElementById('applicationsBody').innerHTML = rows.map((application) => {
             const phone = normalizePhone(application.phone);
-            const date = new Date(application.created_at).toLocaleString('ru-RU');
+            const date = new Intl.DateTimeFormat('ru-RU', {
+                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            }).format(new Date(application.created_at));
+            const isSaving = state.applicationSavingIds.has(String(application.id));
+            const viewStatusOptions = [['unread', 'Не прочитано'], ['viewed', 'Просмотрено'], ['archived', 'Архив']];
             return `
                 <tr data-status="${escapeHtml(application.status)}">
                     <td class="application-select-cell"><input class="application-select" type="checkbox" data-application-select="${escapeHtml(application.id)}" aria-label="Выбрать заявку ${escapeHtml(application.full_name)}" ${state.selectedApplicationIds.has(String(application.id)) ? 'checked' : ''}></td>
                     <td>${escapeHtml(application.full_name)}</td>
-                    <td>${escapeHtml(application.phone)}</td>
+                    <td><a class="application-phone" href="tel:+${escapeHtml(phone)}">${escapeHtml(application.phone)}</a></td>
                     <td>${escapeHtml(application.course_title || 'Консультация')}</td>
                     <td>${escapeHtml(date)}</td>
-                    <td><select class="application-status" data-application-id="${application.id}" data-column="status">${statusOptions(application.status, [['unread', 'Не прочитано'], ['viewed', 'Просмотрено'], ['archived', 'Архив']])}</select></td>
-                    <td><select class="application-status" data-application-id="${application.id}" data-column="payment_status">${statusOptions(application.payment_status, [['pending', 'Ожидает оплаты'], ['paid', 'Оплачено'], ['rejected', 'Отклонено']])}</select></td>
+                    <td><label class="status-control-wrap" aria-label="Статус просмотра">
+                        <select class="application-status view-${escapeHtml(application.status)}" data-application-id="${escapeHtml(application.id)}" data-column="status" aria-label="Изменить статус просмотра" ${isSaving ? 'disabled data-saving="true"' : ''}>${statusOptions(application.status, viewStatusOptions)}</select>
+                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i><i class="fa-solid fa-spinner fa-spin status-spinner" aria-hidden="true"></i>
+                    </label></td>
+                    <td><label class="status-control-wrap" aria-label="Статус оплаты">
+                        <select class="application-status payment-${escapeHtml(application.payment_status)}" data-application-id="${escapeHtml(application.id)}" data-column="payment_status" aria-label="Изменить статус оплаты" ${isSaving ? 'disabled data-saving="true"' : ''}>${statusOptions(application.payment_status, [['pending', 'Ожидает оплаты'], ['paid', 'Оплачено'], ['rejected', 'Отклонено']])}</select>
+                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i><i class="fa-solid fa-spinner fa-spin status-spinner" aria-hidden="true"></i>
+                    </label></td>
                     <td class="application-actions">
-                        <a class="mini-btn application-contact" href="https://wa.me/${escapeHtml(phone)}" target="_blank" rel="noopener" data-view-application="${application.id}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Написать</a>
-                        ${application.status !== 'archived' ? `<button class="mini-btn" type="button" data-application-action="archive" data-application-id="${application.id}">В архив</button>` : ''}
-                        ${application.payment_status !== 'paid' ? `<button class="mini-btn primary" type="button" data-application-action="paid" data-application-id="${application.id}">Оплачено</button>` : ''}
+                        <a class="mini-btn application-contact" href="https://wa.me/${escapeHtml(phone)}" target="_blank" rel="noopener" data-view-application="${escapeHtml(application.id)}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> WhatsApp</a>
                     </td>
                 </tr>`;
         }).join('') || '<tr><td colspan="8">Заявок по выбранным условиям нет.</td></tr>';
@@ -554,30 +582,69 @@
         }
     }
 
-    async function updateApplication(id, column, value) {
+    async function updateApplication(id, column, value, control = null) {
+        const application = state.applications.find((item) => String(item.id) === String(id));
+        const applicationId = String(id);
+        if (!application || state.applicationSavingIds.has(applicationId) || application[column] === value) return;
+        const previousValue = application[column];
         const update = { [column]: value };
         if (column === 'status' && value === 'viewed') update.viewed_at = new Date().toISOString();
-        const { error } = await client.from('applications').update(update).eq('id', id);
+        state.applicationSavingIds.add(applicationId);
+        if (control) {
+            control.disabled = true;
+            control.dataset.saving = 'true';
+        }
+        let error;
+        try {
+            ({ error } = await client.from('applications').update(update).eq('id', id));
+        } catch (requestError) {
+            error = requestError;
+        } finally {
+            state.applicationSavingIds.delete(applicationId);
+        }
         if (error) {
-            alert(`Не удалось обновить заявку: ${error.message}`);
+            if (control) {
+                control.value = previousValue;
+                control.disabled = false;
+                delete control.dataset.saving;
+            }
+            alert(`Не удалось обновить заявку: ${error.message || 'Проверьте соединение и попробуйте ещё раз.'}`);
             return;
         }
-        state.selectedApplicationIds.delete(String(id));
+        state.selectedApplicationIds.delete(applicationId);
         await loadApplications();
     }
 
-    async function updateSelectedApplications(status) {
+    async function updateSelectedApplications(status, triggerButton) {
         const ids = [...state.selectedApplicationIds];
-        if (!ids.length) return;
+        if (!ids.length || state.applicationBulkSaving) return;
+        state.applicationBulkSaving = true;
         const update = { status };
         if (status === 'viewed') update.viewed_at = new Date().toISOString();
-        const { error } = await client.from('applications').update(update).in('id', ids);
-        if (error) {
-            alert(`Не удалось обновить выбранные заявки: ${error.message}`);
-            return;
+        const actionButtons = [...document.querySelectorAll('[data-bulk-application-action]')];
+        const previousLabel = triggerButton?.textContent;
+        actionButtons.forEach((button) => { button.disabled = true; });
+        if (triggerButton) triggerButton.textContent = 'Сохраняем…';
+        try {
+            const { error } = await client.from('applications').update(update).in('id', ids);
+            if (error) {
+                alert(`Не удалось обновить выбранные заявки: ${error.message || 'Проверьте соединение и попробуйте ещё раз.'}`);
+                return;
+            }
+            state.selectedApplicationIds.clear();
+            await loadApplications();
+        } catch (error) {
+            console.error('Ошибка пакетного обновления заявок:', error);
+            alert(`Не удалось обновить выбранные заявки: ${error.message || 'Проверьте соединение и попробуйте ещё раз.'}`);
+        } finally {
+            state.applicationBulkSaving = false;
+            actionButtons.forEach((button) => {
+                if (button.isConnected) button.disabled = false;
+            });
+            if (triggerButton?.isConnected && state.selectedApplicationIds.size > 0) {
+                triggerButton.textContent = previousLabel;
+            }
         }
-        state.selectedApplicationIds.clear();
-        await loadApplications();
     }
 
     document.body.addEventListener('click', async (event) => {
@@ -618,7 +685,7 @@
             return;
         }
         const select = event.target.closest('[data-application-id][data-column]');
-        if (select) updateApplication(select.dataset.applicationId, select.dataset.column, select.value);
+        if (select) updateApplication(select.dataset.applicationId, select.dataset.column, select.value, select);
     });
 
     document.getElementById('applicationShortcuts')?.addEventListener('click', (event) => {
@@ -636,8 +703,9 @@
     });
 
     document.getElementById('applicationBulkActions')?.addEventListener('click', (event) => {
-        const action = event.target.closest('[data-bulk-application-action]')?.dataset.bulkApplicationAction;
-        if (action === 'viewed' || action === 'archived') updateSelectedApplications(action);
+        const actionButton = event.target.closest('[data-bulk-application-action]');
+        const action = actionButton?.dataset.bulkApplicationAction;
+        if (action === 'viewed' || action === 'archived') updateSelectedApplications(action, actionButton);
         if (event.target.closest('#clearApplicationSelection')) {
             state.selectedApplicationIds.clear();
             renderApplications();

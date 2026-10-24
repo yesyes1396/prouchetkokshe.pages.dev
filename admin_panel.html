@@ -416,6 +416,61 @@
         .application-actions { min-width: 220px; }
         .applications-table tr[data-status="unread"] td:first-child { border-left: 3px solid #087e78; }
         .applications-table td:first-child { padding-left: 12px; }
+        .application-search { position: relative; display: flex; align-items: center; min-width: min(280px, 100%); }
+        .application-search > i { position: absolute; left: 12px; color: #85949a; pointer-events: none; }
+        .application-search input { width: 100%; min-width: 0; padding-left: 36px; }
+        .toolbar select, .toolbar input { min-height: 40px; }
+        .application-search { flex: 0 1 300px; }
+        .application-shortcuts .mini-btn, .application-bulk .mini-btn, .application-pagination .mini-btn { min-height: 34px; }
+        .applications-table { table-layout: fixed; min-width: 1160px; }
+        .applications-table th, .applications-table td { padding: 11px 10px; vertical-align: middle; }
+        .applications-table th { padding-top: 10px; padding-bottom: 10px; background: #f7f9f9; font-size: 0.68rem; letter-spacing: 0.07em; white-space: nowrap; }
+        .applications-table th:nth-child(1), .applications-table td:nth-child(1) { width: 40px; }
+        .applications-table th:nth-child(2), .applications-table td:nth-child(2) { width: 190px; }
+        .applications-table th:nth-child(3), .applications-table td:nth-child(3) { width: 145px; }
+        .applications-table th:nth-child(4), .applications-table td:nth-child(4) { width: 180px; }
+        .applications-table th:nth-child(5), .applications-table td:nth-child(5) { width: 165px; }
+        .applications-table th:nth-child(6), .applications-table td:nth-child(6) { width: 150px; }
+        .applications-table th:nth-child(7), .applications-table td:nth-child(7) { width: 155px; }
+        .applications-table th:nth-child(8), .applications-table td:nth-child(8) { width: 175px; }
+        .applications-table tbody tr { transition: background 120ms ease; }
+        .applications-table tbody tr:hover { background: #f7faf9; }
+        .applications-table td:nth-child(2), .applications-table td:nth-child(4) { overflow-wrap: anywhere; line-height: 1.45; }
+        .applications-table td:nth-child(3), .applications-table td:nth-child(5) { white-space: nowrap; }
+        .applications-table tr[data-status="unread"] td:nth-child(2) { border-left: 2px solid #83bdb5; }
+        .application-select-cell { text-align: center!important; padding-left: 6px!important; padding-right: 6px!important; }
+        .status-control-wrap { position: relative; display: inline-flex; max-width: 100%; align-items: center; }
+        .application-status { width: 100%; min-width: 122px; max-width: 100%; height: 30px; appearance: none; border: 1px solid transparent; border-radius: 999px; padding: 0 27px 0 10px; font: 700 0.73rem Manrope, 'Segoe UI', sans-serif; cursor: pointer; transition: border-color 140ms ease, box-shadow 140ms ease; }
+        .status-control-wrap > i { position: absolute; right: 9px; color: currentColor; font-size: 0.62rem; pointer-events: none; }
+        .application-status.view-unread { background: #eaf4f3; color: #17655f; }
+        .application-status.view-viewed { background: #edf5ef; color: #326449; }
+        .application-status.view-archived { background: #eef1f2; color: #617076; }
+        .application-status.payment-pending { background: #fbf3e7; color: #8c621f; }
+        .application-status.payment-paid { background: #eaf5ef; color: #286345; }
+        .application-status.payment-rejected { background: #f9ecea; color: #984a43; }
+        .application-status:hover { border-color: currentColor; }
+        .application-status:focus-visible { outline: 3px solid #bfe3de; outline-offset: 2px; }
+        .application-status:disabled { opacity: 0.7; cursor: wait; }
+        .status-spinner { display: none; }
+        .status-control-wrap select[data-saving="true"] ~ .status-spinner { display: inline-block; }
+        .status-control-wrap select[data-saving="true"] ~ .fa-chevron-down { display: none; }
+        .application-contact { min-height: 31px; padding: 6px 9px; }
+        .application-phone { color: #3d5960; text-decoration: none; white-space: nowrap; }
+        .application-phone:hover { color: var(--primary-dark); text-decoration: underline; }
+        .application-actions { min-width: 0; }
+        .applications-table[aria-busy="true"] tbody { opacity: 0.55; }
+        .application-empty { padding: 28px!important; color: #74848a; text-align: center!important; }
+        @media (max-width: 960px) {
+            #applications .panel-head { align-items: flex-start; }
+            #applications .toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .application-search { min-width: 0; width: 100%; }
+        }
+        @media (max-width: 560px) {
+            #applications .toolbar { grid-template-columns: 1fr; }
+            .application-search { flex-basis: auto; }
+            .application-pagination { display: grid; grid-template-columns: 1fr auto; }
+            .application-pagination-controls { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+        }
         .auth-gate { border-radius: 10px; box-shadow: 0 14px 40px rgba(23, 42, 50, 0.08); }
         .auth-gate .primary-btn { font: inherit; }
         @media (max-width: 960px) {
@@ -526,7 +581,10 @@
                                 <option value="date-asc">Сначала старые</option>
                                 <option value="alpha">По алфавиту</option>
                             </select>
-                            <input id="applicationSearch" type="search" placeholder="Поиск: ФИО или телефон">
+                            <label class="application-search">
+                                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                                <input id="applicationSearch" type="search" placeholder="Поиск по ФИО или телефону" autocomplete="off">
+                            </label>
                         </div>
                     </div>
                     <div class="application-summary">
@@ -546,7 +604,7 @@
                             <button class="mini-btn" type="button" id="clearApplicationSelection">Снять выбор</button>
                         </div>
                     </div>
-                    <div class="table-wrap"><table class="applications-table">
+                    <div class="table-wrap"><table class="applications-table" id="applicationsTable">
                         <thead>
                             <tr>
                                 <th class="application-select-cell"><input class="application-select" id="selectAllApplications" type="checkbox" aria-label="Выбрать заявки на странице"></th>
