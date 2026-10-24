@@ -223,18 +223,24 @@
         if (sort === 'alpha') rows.sort((a, b) => a.full_name.localeCompare(b.full_name, 'ru'));
         else if (sort === 'date-asc') rows.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         else rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const count = document.getElementById('applicationCount');
+        if (count) count.textContent = String(rows.length);
+        document.querySelectorAll('[data-application-filter-button]').forEach((button) => {
+            button.classList.toggle('active', button.dataset.applicationFilterButton === statusFilter);
+        });
         document.getElementById('applicationsBody').innerHTML = rows.map((application) => {
             const phone = normalizePhone(application.phone);
             const date = new Date(application.created_at).toLocaleString('ru-RU');
             return `
-                <tr>
+                <tr data-status="${escapeHtml(application.status)}">
                     <td>${escapeHtml(application.full_name)}</td>
-                    <td><a href="https://wa.me/${escapeHtml(phone)}" target="_blank" rel="noopener" data-view-application="${application.id}">${escapeHtml(application.phone)}</a></td>
+                    <td>${escapeHtml(application.phone)}</td>
                     <td>${escapeHtml(application.course_title || 'Консультация')}</td>
                     <td>${escapeHtml(date)}</td>
                     <td><select class="application-status" data-application-id="${application.id}" data-column="status">${statusOptions(application.status, [['unread', 'Не прочитано'], ['viewed', 'Просмотрено'], ['archived', 'Архив']])}</select></td>
                     <td><select class="application-status" data-application-id="${application.id}" data-column="payment_status">${statusOptions(application.payment_status, [['pending', 'Ожидает оплаты'], ['paid', 'Оплачено'], ['rejected', 'Отклонено']])}</select></td>
                     <td class="application-actions">
+                        <a class="mini-btn application-contact" href="https://wa.me/${escapeHtml(phone)}" target="_blank" rel="noopener" data-view-application="${application.id}"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Написать</a>
                         ${application.status !== 'archived' ? `<button class="mini-btn" type="button" data-application-action="archive" data-application-id="${application.id}">В архив</button>` : ''}
                         ${application.payment_status !== 'paid' ? `<button class="mini-btn primary" type="button" data-application-action="paid" data-application-id="${application.id}">Оплачено</button>` : ''}
                     </td>
@@ -268,7 +274,7 @@
     }
 
     const editorStyles = `
-        .admin-editor-dialog{width:min(720px,calc(100% - 28px));max-width:none;max-height:92vh;padding:0;overflow:hidden;border:1px solid #dce5e7;border-radius:12px;background:#fff;color:#172a32;box-shadow:0 28px 90px #10252c40}
+        .admin-editor-dialog{position:fixed;inset:auto;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;width:min(720px,calc(100% - 28px));max-width:none;max-height:92vh;padding:0;overflow:hidden;border:1px solid #dce5e7;border-radius:12px;background:#fff;color:#172a32;box-shadow:0 28px 90px #10252c40}
         .admin-editor-dialog::backdrop{background:#10252c99;backdrop-filter:blur(3px)}
         .editor-form{display:grid;grid-template-rows:auto minmax(0,1fr) auto;max-height:92vh;font-family:Manrope,'Segoe UI',sans-serif}
         .editor-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:1px solid #e4ebec;background:#f8faf9}
@@ -545,6 +551,20 @@
     document.body.addEventListener('change', (event) => {
         const select = event.target.closest('[data-application-id][data-column]');
         if (select) updateApplication(select.dataset.applicationId, select.dataset.column, select.value);
+    });
+
+    document.getElementById('applicationShortcuts')?.addEventListener('click', (event) => {
+        const filterButton = event.target.closest('[data-application-filter-button]');
+        if (!filterButton) return;
+        document.getElementById('applicationFilter').value = filterButton.dataset.applicationFilterButton;
+        renderApplications();
+    });
+    document.getElementById('resetApplications')?.addEventListener('click', () => {
+        document.getElementById('applicationFilter').value = 'unread';
+        document.getElementById('paymentFilter').value = 'all';
+        document.getElementById('applicationSort').value = 'date-desc';
+        document.getElementById('applicationSearch').value = '';
+        renderApplications();
     });
 
     document.getElementById('searchInput')?.addEventListener('input', renderContent);

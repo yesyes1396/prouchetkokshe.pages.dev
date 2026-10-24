@@ -398,6 +398,14 @@
         .applications-table th { color: #74848a; }
         .applications-table td { font-size: 0.88rem; }
         .application-status { font: inherit; font-size: 0.82rem; }
+        .application-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 12px; color: #64747b; font-size: 0.82rem; }
+        .application-shortcuts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .application-shortcuts .mini-btn { background: #fff; }
+        .application-shortcuts .mini-btn.active { border-color: #91c9c1; background: #e5f4f2; color: #08645f; }
+        .application-count { display: inline-flex; min-width: 28px; height: 26px; align-items: center; justify-content: center; padding: 0 8px; border-radius: 99px; background: #edf2f3; color: #34484f; font-weight: 800; }
+        .application-contact { display: inline-flex; align-items: center; gap: 7px; border-color: #cbe4d8; background: #eff8f2; color: #176344; white-space: nowrap; text-decoration: none; }
+        .applications-table tr[data-status="unread"] td:first-child { border-left: 3px solid #087e78; }
+        .applications-table td:first-child { padding-left: 12px; }
         .auth-gate { border-radius: 10px; box-shadow: 0 14px 40px rgba(23, 42, 50, 0.08); }
         .auth-gate .primary-btn { font: inherit; }
         @media (max-width: 960px) {
@@ -416,6 +424,8 @@
             .panel-head h2 { font-size: 1.05rem; }
             .section-box { padding: 12px; }
             .section-box-header { align-items: flex-start; }
+            .application-summary { align-items: flex-start; flex-direction: column; }
+            .application-shortcuts { width: 100%; }
         }
     </style>
 </head>
@@ -506,6 +516,15 @@
                             </select>
                             <input id="applicationSearch" type="search" placeholder="Поиск: ФИО или телефон">
                         </div>
+                    </div>
+                    <div class="application-summary">
+                        <div class="application-shortcuts" id="applicationShortcuts" aria-label="Быстрые фильтры заявок">
+                            <button class="mini-btn active" type="button" data-application-filter-button="unread">Новые</button>
+                            <button class="mini-btn" type="button" data-application-filter-button="all">Все</button>
+                            <button class="mini-btn" type="button" data-application-filter-button="archived">Архив</button>
+                            <button class="mini-btn" type="button" id="resetApplications" title="Сбросить фильтры и поиск"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Сбросить</button>
+                        </div>
+                        <div>Показано: <span class="application-count" id="applicationCount">0</span></div>
                     </div>
                     <div class="table-wrap"><table class="applications-table">
                         <thead>
