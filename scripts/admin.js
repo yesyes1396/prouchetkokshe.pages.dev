@@ -20,7 +20,11 @@
         whatsapp_url: 'https://wa.me/+77775159566',
         instagram_url: 'https://instagram.com/rakhimova_buh?mdxt=NDJ4N2pqc3poMGli'
     };
-    const state = { cards: [], courses: [], applications: [], footer: defaultFooter };
+    const state = {
+        cards: [], courses: [], applications: [], footer: defaultFooter,
+        unreadApplicationsCount: 0, applicationTotalCount: 0, applicationPage: 1,
+        applicationPageSize: 25, selectedApplicationIds: new Set()
+    };
     const sectionNames = { benefits: 'Преимущества', faq: 'FAQ' };
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -99,13 +103,13 @@
         const results = await Promise.all([
             client.from('content_cards').select('*').order('sort_order'),
             client.from('courses').select('*').order('sort_order'),
-            client.from('applications').select('*').order('created_at', { ascending: false })
+            client.from('site_settings').select('value').eq('key', 'footer').maybeSingle()
         ]);
-        const [cards, courses, applications] = results;
+        const [cards, courses, footer] = results;
         const failed = [
             ['карточек', cards],
             ['курсов', courses],
-            ['заявок', applications]
+            ['настроек футера', footer]
         ].find(([, result]) => result.error);
         if (failed) {
             const [resource, result] = failed;
@@ -115,17 +119,9 @@
         }
         state.cards = cards.data || [];
         state.courses = courses.data || [];
-        state.applications = applications.data || [];
-        const footer = await client.from('site_settings').select('value').eq('key', 'footer').maybeSingle();
-        if (footer.error) {
-            console.error('Ошибка загрузки настроек футера:', footer.error);
-            state.footer = defaultFooter;
-            alert(`Основная админка загружена, но настройки футера недоступны: ${footer.error.message} (код ${footer.error.code || 'не указан'}).`);
-        } else {
-            state.footer = { ...defaultFooter, ...(footer.data?.value || {}) };
-        }
+        state.footer = { ...defaultFooter, ...(footer.data?.value || {}) };
         if (document.getElementById('contentSections')) renderContent();
-        if (document.getElementById('applicationsBody')) renderApplications();
+        if (document.getElementById('applicationsBody')) await loadApplications();
         updateStats();
         window.dispatchEvent(new CustomEvent('prouchet:admin-data', {
             detail: { cards: state.cards, courses: state.courses, applications: state.applications }
@@ -208,31 +204,73 @@
         return digits;
     }
 
-    function renderApplications() {
-        if (!document.getElementById('applicationsBody')) return;
+    async function loadApplications() {
         const statusFilter = document.getElementById('applicationFilter').value;
         const paymentFilter = document.getElementById('paymentFilter').value;
         const sort = document.getElementById('applicationSort').value;
-        const query = document.getElementById('applicationSearch').value.trim().toLocaleLowerCase();
-        const rows = state.applications.filter((application) => {
-            const matchesStatus = statusFilter === 'all' || application.status === statusFilter;
-            const matchesPayment = paymentFilter === 'all' || application.payment_status === paymentFilter;
-            const searchable = `${application.full_name} ${application.phone}`.toLocaleLowerCase();
-            return matchesStatus && matchesPayment && (!query || searchable.includes(query));
-        });
-        if (sort === 'alpha') rows.sort((a, b) => a.full_name.localeCompare(b.full_name, 'ru'));
-        else if (sort === 'date-asc') rows.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        else rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const search = document.getElementById('applicationSearch').value.trim()
+            .replace(/[^\p{L}\p{N}+@ _-]/gu, ' ')
+            .replace(/\s+/g, ' ').trim();
+        const offset = (state.applicationPage - 1) * state.applicationPageSize;
+        const order = sort === 'alpha'
+            ? { column: 'full_name', ascending: true }
+            : { column: 'created_at', ascending: sort === 'date-asc' };
+        let applicationsQuery = client.from('applications').select('*', { count: 'exact' })
+            .order(order.column, { ascending: order.ascending })
+            .order('id', { ascending: true })
+            .range(offset, offset + state.applicationPageSize - 1);
+        if (statusFilter !== 'all') applicationsQuery = applicationsQuery.eq('status', statusFilter);
+        if (paymentFilter !== 'all') applicationsQuery = applicationsQuery.eq('payment_status', paymentFilter);
+        if (search) applicationsQuery = applicationsQuery.or(`full_name.ilike.%${search}%,phone.ilike.%${search}%`);
+
+        const [applications, unread] = await Promise.all([
+            applicationsQuery,
+            client.from('applications').select('id', { count: 'exact', head: true }).eq('status', 'unread')
+        ]);
+        const failed = [applications, unread].find((result) => result.error);
+        if (failed) {
+            console.error('Ошибка загрузки заявок:', failed.error);
+            alert(`Не удалось загрузить заявки: ${failed.error.message}`);
+            return;
+        }
+        state.applicationTotalCount = applications.count || 0;
+        state.unreadApplicationsCount = unread.count || 0;
+        const pageCount = Math.max(1, Math.ceil(state.applicationTotalCount / state.applicationPageSize));
+        if (state.applicationPage > pageCount) {
+            state.applicationPage = pageCount;
+            return loadApplications();
+        }
+        state.applications = applications.data || [];
+        renderApplications();
+        updateStats();
+    }
+
+    function renderApplications() {
+        if (!document.getElementById('applicationsBody')) return;
+        const statusFilter = document.getElementById('applicationFilter').value;
+        const rows = state.applications;
         const count = document.getElementById('applicationCount');
-        if (count) count.textContent = String(rows.length);
+        if (count) count.textContent = String(state.applicationTotalCount);
         document.querySelectorAll('[data-application-filter-button]').forEach((button) => {
             button.classList.toggle('active', button.dataset.applicationFilterButton === statusFilter);
         });
+        const start = state.applicationTotalCount ? (state.applicationPage - 1) * state.applicationPageSize + 1 : 0;
+        const end = Math.min(state.applicationPage * state.applicationPageSize, state.applicationTotalCount);
+        document.getElementById('applicationPageInfo').textContent = `${start}–${end} из ${state.applicationTotalCount}`;
+        document.getElementById('previousApplicationPage').disabled = state.applicationPage <= 1;
+        document.getElementById('nextApplicationPage').disabled = end >= state.applicationTotalCount;
+        const pageIds = rows.map((application) => String(application.id));
+        const selectAll = document.getElementById('selectAllApplications');
+        selectAll.checked = pageIds.length > 0 && pageIds.every((id) => state.selectedApplicationIds.has(id));
+        selectAll.disabled = pageIds.length === 0;
+        document.getElementById('applicationBulkActions').hidden = state.selectedApplicationIds.size === 0;
+        document.getElementById('selectedApplicationCount').textContent = String(state.selectedApplicationIds.size);
         document.getElementById('applicationsBody').innerHTML = rows.map((application) => {
             const phone = normalizePhone(application.phone);
             const date = new Date(application.created_at).toLocaleString('ru-RU');
             return `
                 <tr data-status="${escapeHtml(application.status)}">
+                    <td class="application-select-cell"><input class="application-select" type="checkbox" data-application-select="${escapeHtml(application.id)}" aria-label="Выбрать заявку ${escapeHtml(application.full_name)}" ${state.selectedApplicationIds.has(String(application.id)) ? 'checked' : ''}></td>
                     <td>${escapeHtml(application.full_name)}</td>
                     <td>${escapeHtml(application.phone)}</td>
                     <td>${escapeHtml(application.course_title || 'Консультация')}</td>
@@ -245,7 +283,7 @@
                         ${application.payment_status !== 'paid' ? `<button class="mini-btn primary" type="button" data-application-action="paid" data-application-id="${application.id}">Оплачено</button>` : ''}
                     </td>
                 </tr>`;
-        }).join('') || '<tr><td colspan="7">Заявок по выбранным условиям нет.</td></tr>';
+        }).join('') || '<tr><td colspan="8">Заявок по выбранным условиям нет.</td></tr>';
     }
 
     function updateStats() {
@@ -254,9 +292,9 @@
         const newRequests = document.getElementById('newRequests');
         if (totalSections) totalSections.textContent = '4';
         if (totalCards) totalCards.textContent = String(state.cards.length + state.courses.length);
-        if (newRequests) newRequests.textContent = String(state.applications.filter((item) => item.status === 'unread').length);
+        if (newRequests) newRequests.textContent = String(state.unreadApplicationsCount);
         const inlineCount = document.getElementById('adminInlineNewRequests');
-        if (inlineCount) inlineCount.textContent = String(state.applications.filter((item) => item.status === 'unread').length);
+        if (inlineCount) inlineCount.textContent = String(state.unreadApplicationsCount);
     }
 
     function editorField(label, name, value, options = {}) {
@@ -524,10 +562,22 @@
             alert(`Не удалось обновить заявку: ${error.message}`);
             return;
         }
-        const application = state.applications.find((item) => item.id === id);
-        if (application) Object.assign(application, update);
-        renderApplications();
-        updateStats();
+        state.selectedApplicationIds.delete(String(id));
+        await loadApplications();
+    }
+
+    async function updateSelectedApplications(status) {
+        const ids = [...state.selectedApplicationIds];
+        if (!ids.length) return;
+        const update = { status };
+        if (status === 'viewed') update.viewed_at = new Date().toISOString();
+        const { error } = await client.from('applications').update(update).in('id', ids);
+        if (error) {
+            alert(`Не удалось обновить выбранные заявки: ${error.message}`);
+            return;
+        }
+        state.selectedApplicationIds.clear();
+        await loadApplications();
     }
 
     document.body.addEventListener('click', async (event) => {
@@ -549,6 +599,24 @@
         }
     });
     document.body.addEventListener('change', (event) => {
+        const selectAll = event.target.closest('#selectAllApplications');
+        if (selectAll) {
+            state.applications.forEach((application) => {
+                const id = String(application.id);
+                if (selectAll.checked) state.selectedApplicationIds.add(id);
+                else state.selectedApplicationIds.delete(id);
+            });
+            renderApplications();
+            return;
+        }
+        const selectedRow = event.target.closest('[data-application-select]');
+        if (selectedRow) {
+            const id = selectedRow.dataset.applicationSelect;
+            if (selectedRow.checked) state.selectedApplicationIds.add(id);
+            else state.selectedApplicationIds.delete(id);
+            renderApplications();
+            return;
+        }
         const select = event.target.closest('[data-application-id][data-column]');
         if (select) updateApplication(select.dataset.applicationId, select.dataset.column, select.value);
     });
@@ -557,22 +625,59 @@
         const filterButton = event.target.closest('[data-application-filter-button]');
         if (!filterButton) return;
         document.getElementById('applicationFilter').value = filterButton.dataset.applicationFilterButton;
-        renderApplications();
+        refreshApplicationsFromFirstPage();
     });
     document.getElementById('resetApplications')?.addEventListener('click', () => {
         document.getElementById('applicationFilter').value = 'unread';
         document.getElementById('paymentFilter').value = 'all';
         document.getElementById('applicationSort').value = 'date-desc';
         document.getElementById('applicationSearch').value = '';
-        renderApplications();
+        refreshApplicationsFromFirstPage();
+    });
+
+    document.getElementById('applicationBulkActions')?.addEventListener('click', (event) => {
+        const action = event.target.closest('[data-bulk-application-action]')?.dataset.bulkApplicationAction;
+        if (action === 'viewed' || action === 'archived') updateSelectedApplications(action);
+        if (event.target.closest('#clearApplicationSelection')) {
+            state.selectedApplicationIds.clear();
+            renderApplications();
+        }
+    });
+    document.getElementById('applicationPageSize')?.addEventListener('change', (event) => {
+        state.applicationPageSize = Number(event.target.value);
+        state.applicationPage = 1;
+        state.selectedApplicationIds.clear();
+        loadApplications();
+    });
+    document.getElementById('previousApplicationPage')?.addEventListener('click', () => {
+        if (state.applicationPage <= 1) return;
+        state.applicationPage -= 1;
+        state.selectedApplicationIds.clear();
+        loadApplications();
+    });
+    document.getElementById('nextApplicationPage')?.addEventListener('click', () => {
+        const pageCount = Math.ceil(state.applicationTotalCount / state.applicationPageSize);
+        if (state.applicationPage >= pageCount) return;
+        state.applicationPage += 1;
+        state.selectedApplicationIds.clear();
+        loadApplications();
     });
 
     document.getElementById('searchInput')?.addEventListener('input', renderContent);
     document.getElementById('sortSelect')?.addEventListener('change', renderContent);
-    document.getElementById('applicationFilter')?.addEventListener('change', renderApplications);
-    document.getElementById('paymentFilter')?.addEventListener('change', renderApplications);
-    document.getElementById('applicationSort')?.addEventListener('change', renderApplications);
-    document.getElementById('applicationSearch')?.addEventListener('input', renderApplications);
+    function refreshApplicationsFromFirstPage() {
+        state.applicationPage = 1;
+        state.selectedApplicationIds.clear();
+        loadApplications();
+    }
+    document.getElementById('applicationFilter')?.addEventListener('change', refreshApplicationsFromFirstPage);
+    document.getElementById('paymentFilter')?.addEventListener('change', refreshApplicationsFromFirstPage);
+    document.getElementById('applicationSort')?.addEventListener('change', refreshApplicationsFromFirstPage);
+    let applicationSearchTimer;
+    document.getElementById('applicationSearch')?.addEventListener('input', () => {
+        window.clearTimeout(applicationSearchTimer);
+        applicationSearchTimer = window.setTimeout(refreshApplicationsFromFirstPage, 250);
+    });
     document.getElementById('syncBtn')?.addEventListener('click', loadEverything);
     document.getElementById('siteBtn')?.addEventListener('click', () => {
         if (adminShell) {

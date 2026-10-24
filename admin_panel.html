@@ -404,6 +404,16 @@
         .application-shortcuts .mini-btn.active { border-color: #91c9c1; background: #e5f4f2; color: #08645f; }
         .application-count { display: inline-flex; min-width: 28px; height: 26px; align-items: center; justify-content: center; padding: 0 8px; border-radius: 99px; background: #edf2f3; color: #34484f; font-weight: 800; }
         .application-contact { display: inline-flex; align-items: center; gap: 7px; border-color: #cbe4d8; background: #eff8f2; color: #176344; white-space: nowrap; text-decoration: none; }
+        .application-bulk { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; padding: 11px 12px; border: 1px solid #c8e3df; border-radius: 7px; background: #eff8f6; color: #24564e; font-size: 0.84rem; }
+        .application-bulk[hidden] { display: none; }
+        .application-bulk-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+        .application-pagination { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; color: #64747b; font-size: 0.82rem; }
+        .application-pagination-controls { display: flex; gap: 6px; }
+        .application-pagination select { margin-left: 5px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--text); font: inherit; }
+        .application-pagination button:disabled { opacity: 0.45; cursor: default; transform: none; }
+        .application-select { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .application-select-cell { width: 38px; }
+        .application-actions { min-width: 220px; }
         .applications-table tr[data-status="unread"] td:first-child { border-left: 3px solid #087e78; }
         .applications-table td:first-child { padding-left: 12px; }
         .auth-gate { border-radius: 10px; box-shadow: 0 14px 40px rgba(23, 42, 50, 0.08); }
@@ -426,6 +436,8 @@
             .section-box-header { align-items: flex-start; }
             .application-summary { align-items: flex-start; flex-direction: column; }
             .application-shortcuts { width: 100%; }
+            .application-bulk, .application-pagination { align-items: flex-start; flex-direction: column; }
+            .application-bulk-actions { width: 100%; }
         }
     </style>
 </head>
@@ -524,11 +536,20 @@
                             <button class="mini-btn" type="button" data-application-filter-button="archived">Архив</button>
                             <button class="mini-btn" type="button" id="resetApplications" title="Сбросить фильтры и поиск"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Сбросить</button>
                         </div>
-                        <div>Показано: <span class="application-count" id="applicationCount">0</span></div>
+                        <div>Найдено: <span class="application-count" id="applicationCount">0</span></div>
+                    </div>
+                    <div class="application-bulk" id="applicationBulkActions" hidden>
+                        <span>Выбрано: <strong id="selectedApplicationCount">0</strong></span>
+                        <div class="application-bulk-actions">
+                            <button class="mini-btn primary" type="button" data-bulk-application-action="viewed"><i class="fa-solid fa-check" aria-hidden="true"></i> Просмотрено</button>
+                            <button class="mini-btn" type="button" data-bulk-application-action="archived"><i class="fa-solid fa-box-archive" aria-hidden="true"></i> В архив</button>
+                            <button class="mini-btn" type="button" id="clearApplicationSelection">Снять выбор</button>
+                        </div>
                     </div>
                     <div class="table-wrap"><table class="applications-table">
                         <thead>
                             <tr>
+                                <th class="application-select-cell"><input class="application-select" id="selectAllApplications" type="checkbox" aria-label="Выбрать заявки на странице"></th>
                                 <th>ФИО</th>
                                 <th>Телефон</th>
                                 <th>Курс</th>
@@ -540,6 +561,20 @@
                         </thead>
                         <tbody id="applicationsBody"></tbody>
                     </table></div>
+                    <div class="application-pagination">
+                        <label>На странице
+                            <select id="applicationPageSize" aria-label="Количество заявок на странице">
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </label>
+                        <span id="applicationPageInfo">0 заявок</span>
+                        <div class="application-pagination-controls">
+                            <button class="mini-btn" type="button" id="previousApplicationPage" aria-label="Предыдущая страница"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                            <button class="mini-btn" type="button" id="nextApplicationPage" aria-label="Следующая страница"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
                 </section>
             </main>
         </div>
