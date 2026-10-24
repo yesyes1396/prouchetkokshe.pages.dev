@@ -256,7 +256,7 @@
     function editorField(label, name, value, options = {}) {
         const safeValue = escapeHtml(value ?? '');
         if (options.type === 'checkbox') {
-            return `<label>${label}<input type="checkbox" name="${name}" ${value ? 'checked' : ''}></label>`;
+            return `<label class="editor-checkbox">${label}<input type="checkbox" name="${name}" ${value ? 'checked' : ''}><span class="editor-switch" aria-hidden="true"></span></label>`;
         }
         if (options.type === 'textarea') {
             return `<label>${label}<textarea name="${name}" rows="${options.rows || 3}" ${options.required ? 'required' : ''}>${safeValue}</textarea></label>`;
@@ -265,6 +265,53 @@
             return `<label>${label}<input name="${name}" type="file" accept="image/png,image/jpeg,image/webp"></label>`;
         }
         return `<label>${label}<input name="${name}" type="${options.type || 'text'}" value="${safeValue}" ${options.required ? 'required' : ''} ${options.min !== undefined ? `min="${options.min}"` : ''}></label>`;
+    }
+
+    const editorStyles = `
+        .admin-editor-dialog{width:min(720px,calc(100% - 28px));max-width:none;max-height:92vh;padding:0;overflow:hidden;border:1px solid #dce5e7;border-radius:12px;background:#fff;color:#172a32;box-shadow:0 28px 90px #10252c40}
+        .admin-editor-dialog::backdrop{background:#10252c99;backdrop-filter:blur(3px)}
+        .editor-form{display:grid;grid-template-rows:auto minmax(0,1fr) auto;max-height:92vh;font-family:Manrope,'Segoe UI',sans-serif}
+        .editor-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:1px solid #e4ebec;background:#f8faf9}
+        .editor-kicker{display:block;margin-bottom:5px;color:#087e78;font-size:.65rem;font-weight:800;letter-spacing:.12em}
+        .editor-form h2{margin:0;color:#172a32;font-size:1.2rem;letter-spacing:0}
+        .editor-close{display:grid;place-items:center;width:36px;height:36px;border:1px solid #dce5e7;border-radius:7px;background:#fff;color:#506168;font:inherit;font-size:1rem;cursor:pointer}
+        .editor-fields{display:grid;align-content:start;gap:15px;overflow:auto;padding:22px 24px}
+        .editor-form label{display:grid;gap:7px;color:#34484f;font-size:.83rem;font-weight:700}
+        .editor-form input:not([type=checkbox]),.editor-form textarea{width:100%;min-height:42px;padding:10px 12px;border:1px solid #d6e0e2;border-radius:7px;background:#fff;color:#172a32;font:500 .9rem Manrope,'Segoe UI',sans-serif;transition:border-color 150ms ease,box-shadow 150ms ease}
+        .editor-form textarea{min-height:92px;resize:vertical;line-height:1.5}
+        .editor-form input:focus,.editor-form textarea:focus{outline:0;border-color:#087e78;box-shadow:0 0 0 3px #d6eeea}
+        .editor-form input[type=file]{padding:8px}
+        .editor-checkbox{position:relative;display:flex!important;align-items:center;gap:12px!important;min-height:42px;width:fit-content;cursor:pointer}
+        .editor-checkbox input{position:absolute;width:1px;height:1px;opacity:0}
+        .editor-switch{position:relative;width:42px;height:24px;border-radius:99px;background:#cbd5d7;transition:background 160ms ease}
+        .editor-switch::after{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #172a3233;content:'';transition:transform 160ms ease}
+        .editor-checkbox input:checked+.editor-switch{background:#087e78}
+        .editor-checkbox input:checked+.editor-switch::after{transform:translateX(18px)}
+        .editor-checkbox input:focus-visible+.editor-switch{outline:3px solid #c8e8e3;outline-offset:2px}
+        .editor-actions{display:flex;justify-content:flex-end;gap:9px;padding:14px 24px;border-top:1px solid #e4ebec;background:#fff}
+        .editor-actions button{min-width:108px;border-radius:7px;font:700 .84rem Manrope,'Segoe UI',sans-serif}
+        .editor-actions .soft-btn{border:1px solid #dce5e7;background:#fff;color:#43565c}
+        .editor-actions .primary-btn{border:1px solid #087e78;background:#087e78;color:#fff}
+        @media(max-width:560px){.admin-editor-dialog{width:calc(100% - 16px);max-height:94vh}.editor-form{max-height:94vh}.editor-head{padding:16px}.editor-fields{gap:12px;padding:16px}.editor-actions{padding:12px 16px}.editor-actions button{flex:1}}
+    `;
+
+    function prepareEditor(editor, title, fields) {
+        editor.className = 'admin-editor-dialog';
+        editor.innerHTML = `
+            <style>${editorStyles}</style>
+            <form method="dialog" class="editor-form">
+                <header class="editor-head">
+                    <div><span class="editor-kicker">PROUCHET · РЕДАКТОР</span><h2>${title}</h2></div>
+                    <button type="button" class="editor-close" data-close aria-label="Закрыть"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                </header>
+                <div class="editor-fields">${fields.join('')}</div>
+                <div class="editor-actions"><button type="button" class="soft-btn" data-cancel>Отмена</button><button type="submit" class="primary-btn"><i class="fa-solid fa-check" aria-hidden="true"></i> Сохранить</button></div>
+            </form>`;
+        document.body.append(editor);
+        const form = editor.querySelector('form');
+        editor.querySelectorAll('[data-close], [data-cancel]').forEach((button) => button.addEventListener('click', () => editor.close()));
+        editor.addEventListener('close', () => editor.remove());
+        return form;
     }
 
     async function applyOrder(type, section, savedItem, requestedPosition) {
@@ -290,22 +337,11 @@
     async function editItem(type, item = null, section = null) {
         const isCourse = type === 'courses';
         const editor = document.createElement('dialog');
-        editor.style.cssText = 'border:0;border-radius:14px;width:min(680px,calc(100% - 24px));max-height:90vh;padding:24px;box-shadow:0 20px 60px #0f172a40';
         const itemValues = item || { icon: 'fa-solid fa-circle-check', is_published: true, sort_order: isCourse ? state.courses.length + 1 : state.cards.filter((card) => card.section === section).length + 1 };
         const fields = isCourse
             ? [editorField('Название', 'title', itemValues.title, { required: true }), editorField('Ссылка slug', 'slug', itemValues.slug, { required: true }), editorField('Категория', 'category', itemValues.category || 'Бухгалтерия', { required: true }), editorField('Короткое описание', 'short_description', itemValues.short_description, { type: 'textarea' }), editorField('Описание страницы', 'description', itemValues.description, { type: 'textarea', rows: 5 }), editorField('Программа, один пункт на строку', 'curriculum', (itemValues.curriculum || []).join('\n'), { type: 'textarea', rows: 6 }), editorField('Длительность', 'duration', itemValues.duration), editorField('Цена', 'price', itemValues.price, { type: 'number', min: 0, required: true }), editorField('Валюта', 'currency', itemValues.currency || 'KZT'), editorField('Инструкция по оплате', 'payment_instructions', itemValues.payment_instructions, { type: 'textarea', rows: 4 }), editorField('Публичная ссылка на Kaspi QR', 'kaspi_qr_url', itemValues.kaspi_qr_url), editorField('Загрузить/заменить QR (PNG, JPG или WebP)', 'kaspi_qr_file', '', { type: 'file' }), editorField('Порядок', 'sort_order', itemValues.sort_order, { type: 'number', min: 1 }), editorField('Опубликовано', 'is_published', itemValues.is_published, { type: 'checkbox' })]
             : [editorField('Иконка Font Awesome', 'icon', itemValues.icon), editorField('Заголовок', 'title', itemValues.title, { required: true }), editorField('Текст', 'body', itemValues.body, { type: 'textarea', rows: 5, required: true }), editorField('Порядок', 'sort_order', itemValues.sort_order, { type: 'number', min: 1 }), editorField('Опубликовано', 'is_published', itemValues.is_published, { type: 'checkbox' })];
-        editor.innerHTML = `
-            <form method="dialog" class="editor-form">
-                <style>.editor-form{display:grid;gap:12px}.editor-form h2{margin:0 0 6px}.editor-form label{display:grid;gap:6px;font-weight:600}.editor-form input:not([type=checkbox]),.editor-form textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.editor-form [type=checkbox]{justify-self:start}.editor-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}</style>
-                <h2>${item ? 'Изменить' : 'Добавить'} ${isCourse ? 'курс' : sectionNames[section]}</h2>
-                ${fields.join('')}
-                <div class="editor-actions"><button type="button" class="soft-btn" data-close>Отмена</button><button type="submit" class="primary-btn">Сохранить</button></div>
-            </form>`;
-        document.body.append(editor);
-        const form = editor.querySelector('form');
-        editor.querySelector('[data-close]').addEventListener('click', () => editor.close());
-        editor.addEventListener('close', () => editor.remove());
+        const form = prepareEditor(editor, `${item ? 'Изменить' : 'Добавить'} ${isCourse ? 'курс' : sectionNames[section]}`, fields);
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const data = new FormData(form);
@@ -409,18 +445,7 @@
             editorField('Ссылка Instagram', 'instagram_url', footer.instagram_url)
         ];
         const editor = document.createElement('dialog');
-        editor.style.cssText = 'border:0;border-radius:14px;width:min(680px,calc(100% - 24px));max-height:90vh;padding:24px;box-shadow:0 20px 60px #0f172a40';
-        editor.innerHTML = `
-            <form method="dialog" class="editor-form">
-                <style>.editor-form{display:grid;gap:12px}.editor-form h2{margin:0 0 6px}.editor-form label{display:grid;gap:6px;font-weight:600}.editor-form input:not([type=checkbox]),.editor-form textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}.editor-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}</style>
-                <h2>Редактировать футер</h2>
-                ${fields.join('')}
-                <div class="editor-actions"><button type="button" class="soft-btn" data-close>Отмена</button><button type="submit" class="primary-btn">Сохранить</button></div>
-            </form>`;
-        document.body.append(editor);
-        const form = editor.querySelector('form');
-        editor.querySelector('[data-close]').addEventListener('click', () => editor.close());
-        editor.addEventListener('close', () => editor.remove());
+        const form = prepareEditor(editor, 'Редактировать футер', fields);
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const data = new FormData(form);

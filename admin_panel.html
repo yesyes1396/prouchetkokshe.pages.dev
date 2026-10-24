@@ -6,6 +6,9 @@
     <title>Админ-панель | ProUchet</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f8fafc;
@@ -306,6 +309,113 @@
             .topbar-actions { justify-content: flex-end; }
             .topbar-actions button { padding: 9px 10px; }
             .stats-grid { grid-template-columns: 1fr; }
+        }
+
+        :root {
+            --bg: #f1f5f7;
+            --panel-soft: #e5f4f2;
+            --primary: #087e78;
+            --primary-dark: #08645f;
+            --text: #172a32;
+            --text-soft: #64747b;
+            --line: #dce5e7;
+            --success: #16805d;
+            --warning: #b76b12;
+            --danger: #c34444;
+        }
+        html, body { font-family: 'Manrope', 'Segoe UI', sans-serif; }
+        body { background: var(--bg); }
+        .admin-shell { max-width: 1500px; padding: 28px clamp(14px, 3vw, 36px); }
+        .topbar {
+            position: relative;
+            overflow: hidden;
+            color: #f5fbfa;
+            background: #172a32;
+            border: 0;
+            border-radius: 10px;
+            padding: 22px 26px;
+            box-shadow: 0 12px 30px rgba(23, 42, 50, 0.12);
+        }
+        .topbar h1 { position: relative; z-index: 1; font-size: 1.45rem; letter-spacing: 0; }
+        .topbar h1::before {
+            display: block;
+            margin-bottom: 5px;
+            color: #87c8bd;
+            content: 'УПРАВЛЕНИЕ САЙТОМ';
+            font-size: 0.67rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+        }
+        .topbar-actions { position: relative; z-index: 1; }
+        .badge, .soft-btn, .danger-btn, .primary-btn {
+            border-radius: 7px;
+            padding: 10px 13px;
+            font: inherit;
+            font-size: 0.83rem;
+            transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+        }
+        button { font-family: inherit; }
+        button:hover { transform: translateY(-1px); }
+        .soft-btn { background: #263b43; color: #f5fbfa; border: 1px solid #40545a; }
+        .soft-btn:hover { background: #334a51; }
+        .danger-btn { background: #fbe8e5; color: #9f3938; }
+        .primary-btn { background: var(--primary); }
+        .layout { grid-template-columns: 205px minmax(0, 1fr); gap: 20px; margin-top: 20px; }
+        .sidebar { border-radius: 10px; padding: 14px; box-shadow: 0 5px 20px rgba(23, 42, 50, 0.035); }
+        .sidebar h3 { padding: 6px 9px 4px; color: #839197; font-size: 0.67rem; letter-spacing: 0.13em; }
+        .sidebar nav { gap: 4px; }
+        .sidebar a { border-radius: 7px; padding: 11px 10px; font-size: 0.86rem; }
+        .sidebar a i { color: #829399; }
+        .sidebar a.active, .sidebar a:hover { background: #e5f4f2; color: var(--primary-dark); border-color: transparent; }
+        .sidebar a.active i, .sidebar a:hover i { color: var(--primary); }
+        .content { gap: 18px; }
+        .stats-grid { gap: 14px; }
+        .stat-card { position: relative; overflow: hidden; border-radius: 9px; padding: 18px 20px; box-shadow: 0 5px 20px rgba(23, 42, 50, 0.035); }
+        .stat-card::before { position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--primary); content: ''; }
+        .stat-card:nth-child(2)::before { background: #d39037; }
+        .stat-card:nth-child(3)::before { background: #4187a2; }
+        .stat-card .label { color: #78888e; font-size: 0.7rem; letter-spacing: 0.1em; }
+        .stat-card .value { font-size: 1.8rem; }
+        .panel-box { border-radius: 9px; padding: 22px; box-shadow: 0 5px 20px rgba(23, 42, 50, 0.035); }
+        .panel-head { margin-bottom: 18px; }
+        .panel-head h2 { font-size: 1.15rem; letter-spacing: 0; }
+        .toolbar input, .toolbar select, .auth-gate input { border-radius: 7px; border-color: #d6e0e2; font: inherit; }
+        .toolbar input:focus, .toolbar select:focus, .auth-gate input:focus { outline: 3px solid #c8e8e3; border-color: var(--primary); }
+        .section-stack { gap: 16px; }
+        .section-box { border-radius: 8px; padding: 17px; background: #f8faf9; }
+        .section-box-header { margin-bottom: 15px; }
+        .section-box-header h3 { font-size: 0.98rem; }
+        .cards-grid { gap: 10px; }
+        .content-card { border-radius: 7px; padding: 15px; min-height: 0; box-shadow: 0 2px 8px rgba(23, 42, 50, 0.025); }
+        .content-card h4 { font-size: 0.98rem; }
+        .content-card p { font-size: 0.88rem; }
+        .content-card .icon-box { border-radius: 7px; background: #e5f4f2; color: var(--primary); }
+        .mini-btn { border-radius: 6px; font: inherit; font-size: 0.77rem; padding: 7px 9px; }
+        .mini-btn.primary { background: var(--primary); border-color: var(--primary); }
+        .mini-btn.danger { background: #fcebea; color: #a53d3c; border-color: #f2d0cd; }
+        .mini-btn.warning { background: #fbf1e2; color: #99601f; border-color: #ecd7b7; }
+        .add-card { min-height: 150px; border-radius: 7px; border-color: #bfd3d2; background: #f8fcfb; color: var(--primary); }
+        .applications-table th { color: #74848a; }
+        .applications-table td { font-size: 0.88rem; }
+        .application-status { font: inherit; font-size: 0.82rem; }
+        .auth-gate { border-radius: 10px; box-shadow: 0 14px 40px rgba(23, 42, 50, 0.08); }
+        .auth-gate .primary-btn { font: inherit; }
+        @media (max-width: 960px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { border-radius: 8px; }
+            .sidebar nav { gap: 5px; }
+            .sidebar a { padding: 9px 10px; }
+        }
+        @media (max-width: 560px) {
+            .admin-shell { padding: 10px; }
+            .topbar { flex-direction: column; gap: 14px; padding: 17px; }
+            .topbar h1 { font-size: 1.18rem; }
+            .topbar-actions { width: 100%; justify-content: flex-start; }
+            .topbar-actions button { padding: 8px 9px; font-size: 0.75rem; }
+            .panel-box { padding: 14px; }
+            .panel-head h2 { font-size: 1.05rem; }
+            .section-box { padding: 12px; }
+            .section-box-header { align-items: flex-start; }
         }
     </style>
 </head>
